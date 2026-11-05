@@ -1,0 +1,1112 @@
+<title>Makieta Q4Rail ERP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: dark brand sidebar + white top bar; spreadsheet grid fills the workspace, "Na dziś" rail on the right; details = sticky header + tabs. Deliberately light-only (Excel fills carry meaning). */
+:root{
+  color-scheme: light;
+  --ink:#15171A; --ink-2:#24272B; --sb-text:#D6D8DB; --sb-muted:#8C9096;
+  --canvas:#F3F3F1; --surface:#FFFFFF; --zebra:#F3F7FC; --line:#E4E5E2; --line-2:#CFD2CE;
+  --text:#1C1E21; --muted:#6A6E73; --faint:#9A9EA3;
+  --accent:#FF6A3D; --accent-hover:#F2582A; --accent-soft:#FFE7DE; --on-accent:#FFFFFF;
+  --rev:#1D5FC4; --cost:#BF3328;
+  --f-blue:#CFE0F6; --f-lgreen:#D9F1D0; --f-green:#8FD38B; --f-green-ink:#0F3B12;
+  --f-yellow:#FFEE9C; --f-purple:#E4D4F6; --f-red:#F6C3BC;
+  --hover:#EAF1FB; --sel:#DCE8F9;
+  --ok:#2D8A47; --ok-dark:#1E5E31; --warn:#C27C00; --warn-soft:#FFF4D6; --danger:#BF3328;
+  --u-MS:#138A84; --u-JK:#D9731C; --u-KS:#7A4FD0; --u-PR:#2F6FD6; --u-MT:#D2477F; --u-BS:#5B6470;
+  --font-ui:'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sbw:212px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--text);font-family:var(--font-ui);font-size:13px;overflow:hidden;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--rev);outline-offset:1px}
+.mono{font-family:var(--font-mono);font-size:12px}
+.muted{color:var(--muted)}
+.app{display:grid;grid-template-columns:var(--sbw) 1fr;height:100%}
+.app.collapsed{--sbw:56px}
+
+/* Sidebar */
+.sb{background:var(--ink);color:var(--sb-text);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.brand{height:52px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--ink-2)}
+.brand .wm{font-weight:800;font-size:19px;letter-spacing:-.02em;color:#fff;white-space:nowrap}
+.brand .wm b{color:var(--accent);font-weight:800}
+.brand small{display:block;font-size:8.5px;letter-spacing:.32em;color:var(--sb-muted);font-weight:600;margin-top:-2px}
+.nav{display:flex;flex-direction:column;gap:2px;padding:10px 8px;flex:1;overflow:auto}
+.nav button{display:flex;align-items:center;gap:11px;background:none;border:0;color:var(--sb-text);padding:8px 10px;border-radius:6px;text-align:left;white-space:nowrap;font-size:13px}
+.nav button:hover{background:var(--ink-2);color:#fff}
+.nav button.on{background:var(--ink-2);color:#fff;box-shadow:inset 3px 0 0 var(--accent)}
+.nav svg{flex:none;width:18px;height:18px}
+.nav .cnt{margin-left:auto;background:var(--accent);color:var(--on-accent);font-size:10.5px;font-weight:700;border-radius:9px;padding:1px 6px}
+.nav .sep{height:1px;background:var(--ink-2);margin:6px 4px}
+.sb-foot{padding:10px 8px;border-top:1px solid var(--ink-2)}
+.sb-foot button{background:none;border:0;color:var(--sb-muted);display:flex;gap:10px;align-items:center;padding:6px 10px;white-space:nowrap}
+.app.collapsed .nav .lbl,.app.collapsed .nav .cnt,.app.collapsed .brand .txt,.app.collapsed .sb-foot .lbl{display:none}
+.app.collapsed .brand{padding:0 12px}
+
+/* Top bar */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.top{height:52px;flex:none;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px}
+.search{flex:1;max-width:460px;position:relative}
+.search input{width:100%;height:34px;border:1px solid var(--line-2);border-radius:7px;padding:0 12px 0 34px;background:var(--canvas)}
+.search svg{position:absolute;left:10px;top:9px;width:16px;height:16px;color:var(--muted)}
+.search kbd{position:absolute;right:8px;top:8px;font-size:10.5px;border:1px solid var(--line-2);border-radius:4px;padding:0 5px;color:var(--muted);background:var(--surface)}
+.top .sp{flex:1}
+.btn{height:32px;border-radius:7px;border:1px solid var(--line-2);background:var(--surface);padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;white-space:nowrap}
+.btn:hover{background:var(--canvas)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.primary[aria-disabled="true"]{background:var(--line);border-color:var(--line-2);color:var(--faint);cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover{background:var(--canvas)}
+.btn.sm{height:26px;padding:0 9px;font-size:12px}
+.btn.danger{color:var(--danger)}
+.iconbtn{width:34px;height:34px;border-radius:7px;border:0;background:none;display:grid;place-items:center;position:relative;color:var(--text)}
+.iconbtn:hover{background:var(--canvas)}
+.iconbtn svg{width:19px;height:19px}
+.iconbtn .dot{position:absolute;top:3px;right:2px;background:var(--accent);color:var(--on-accent);font-size:10px;font-weight:700;border-radius:8px;padding:0 5px;line-height:15px}
+.me{display:flex;align-items:center;gap:8px;border:0;background:none;padding:3px 6px;border-radius:7px}
+.me:hover{background:var(--canvas)}
+.me .who{text-align:left;line-height:1.15}
+.me .who b{display:block;font-size:12.5px}
+.me .who span{font-size:11px;color:var(--muted)}
+
+/* Badges & chips */
+.op{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.02em;flex:none}
+.op.lg{width:32px;height:32px;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;border-radius:10px;padding:0 8px;font-size:11.5px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+.st-Nowe{background:#ECEDEB;color:#4C5055}
+.st-Zaplanowane{background:var(--f-blue);color:#174A8F}
+.st-Podjęte{background:var(--f-lgreen);color:#2E6A21}
+.st-Wdrodze{background:#BFE6BC;color:#1F5A1C}
+.st-Dojeżdża{background:var(--f-yellow);color:#6E5600}
+.st-Zakończone{background:var(--f-green);color:var(--f-green-ink)}
+.st-Anulowane{background:#ECEDEB;color:#83878C;text-decoration:line-through}
+.rz-Dozafakturowania{border-color:var(--line-2);color:var(--muted);background:var(--surface)}
+.rz-Zafakturowane{background:#DDF3DC;color:#1F6B26;border-color:#A9DCA7}
+.rz-Kosztyniekompletne{background:#FFE6CC;color:#9A4A00}
+.rz-Rozliczone{background:var(--ok);color:#fff}
+.rz-Miesiączamknięty{background:var(--ok-dark);color:#fff}
+.tchip{display:inline-flex;height:20px;align-items:center;padding:0 7px;border-radius:4px;background:var(--canvas);border:1px solid var(--line-2);font-size:11.5px;font-weight:700;letter-spacing:.02em}
+.flag{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 7px;border-radius:4px;font-size:11.5px;font-weight:600}
+.flag i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.warn-ic{color:var(--warn);font-weight:700;cursor:help}
+
+/* List view */
+.view{flex:1;min-height:0;display:flex;flex-direction:column}
+.lhead{flex:none;background:var(--surface);padding:12px 16px 0;display:flex;flex-direction:column;gap:10px}
+.ltitle{display:flex;align-items:baseline;gap:12px}
+.ltitle h1{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0}
+.ltitle .meta{color:var(--muted);font-size:12px}
+.vtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.vtabs button{background:none;border:0;padding:8px 12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px}
+.vtabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+.vtabs button .n{font-size:11px;color:var(--faint);margin-left:4px;font-weight:600}
+.vtabs .save{color:var(--rev)}
+.fbar{flex:none;background:var(--surface);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.fbar select,.fbar input[type=date],.fbar input[type=text]{height:28px;border:1px solid var(--line-2);border-radius:6px;padding:0 8px;background:var(--surface);font-size:12px}
+.fbar input[type=text]{width:170px}
+.fbar .grp{display:flex;align-items:center;gap:4px}
+.fbar .lab{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.opsel{display:flex;gap:3px}
+.opsel button{border:0;padding:0;background:none;border-radius:50%;opacity:.32;transition:opacity .12s}
+.opsel button.on{opacity:1}
+.fbar .sp{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;background:var(--surface)}
+.chips:empty{display:none}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 4px 0 10px;border-radius:12px;background:var(--sel);color:#16407A;font-size:12px;font-weight:600}
+.fchip button{border:0;background:none;width:18px;height:18px;border-radius:50%;color:inherit;font-size:14px;line-height:1}
+.fchip button:hover{background:#C3D6F2}
+.work{flex:1;min-height:0;display:flex;position:relative}
+.gridwrap{flex:1;min-width:0;overflow:auto;background:var(--surface);position:relative}
+table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed}
+.grid th,.grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid thead th{background:#F7F7F5;font-weight:700;font-size:11.5px;text-align:left;color:#3A3D41}
+.grid tr.g th{position:sticky;top:0;height:22px;z-index:3;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--line-2)}
+.grid tr.g th.g-Przychody{color:var(--rev);background:#EEF4FC}
+.grid tr.g th.g-Koszty{color:var(--cost);background:#FCF0EE}
+.grid tr.c th{position:sticky;top:22px;height:40px;z-index:3;white-space:normal;line-height:1.15;vertical-align:middle;border-bottom:1px solid var(--line-2)}
+.grid tr.c th .hd{display:flex;align-items:center;gap:3px}
+.grid tr.c th .hl{flex:1;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.grid tr.c th .fi{opacity:.35;border:0;background:none;padding:2px;border-radius:3px;line-height:0;flex:none}
+.grid tr.c th:hover .fi{opacity:.8}
+.grid tr.c th .fi:hover{background:var(--line)}
+.grid tr.c th .fi svg{width:11px;height:11px}
+.grid tr.c th .so{font-size:10px;color:var(--rev)}
+.grid .pin{position:sticky}
+.grid td.pin{z-index:1}
+.grid thead tr th.pin{z-index:6}
+.grid .pinlast{box-shadow:2px 0 0 var(--line-2)}
+.grid td{height:32px;background:var(--surface)}
+.grid tbody tr:nth-child(even) td{background:var(--zebra)}
+.grid tbody tr:hover td{background:var(--hover)}
+.grid tbody tr.sel td{background:var(--sel)}
+.grid tbody tr td.f-blue{background:var(--f-blue)}
+.grid tbody tr td.f-lgreen{background:var(--f-lgreen)}
+.grid tbody tr td.f-green{background:var(--f-green);color:var(--f-green-ink)}
+.grid tbody tr td.f-yellow{background:var(--f-yellow)}
+.grid tbody tr td.f-purple{background:var(--f-purple)}
+.grid tbody tr td.f-red{background:var(--f-red)}
+.grid tbody tr{cursor:default}
+.grid td.num{text-align:right}
+.grid td.c{text-align:center}
+.dash{display:block;text-align:center;color:var(--faint)}
+.rev{color:var(--rev)}
+.cost{color:var(--cost);font-weight:700}
+.rez{font-style:italic;font-weight:400;text-decoration:underline dotted;text-underline-offset:3px}
+.neg{color:var(--danger);font-weight:700}
+.b{font-weight:700}
+.grid tbody tr.cancel td{color:var(--faint);text-decoration:line-through;background:#F6F6F5}
+.grid td.edit{padding:0;outline:2px solid var(--rev);outline-offset:-2px}
+.grid td.edit input{width:100%;height:30px;border:0;padding:0 6px;background:#fff;font-size:12.5px;text-align:inherit}
+.lock{font-size:10px}
+.empty-row td{text-align:center;color:var(--muted);height:80px}
+
+/* Na dziś panel */
+.today{width:308px;flex:none;border-left:1px solid var(--line);background:var(--canvas);display:flex;flex-direction:column;min-height:0}
+.today[hidden]{display:none}
+.today header{padding:12px 14px 8px;display:flex;align-items:center;gap:8px}
+.today header h2{font-size:14px;font-weight:800;margin:0}
+.today header .d{color:var(--muted);font-size:11.5px}
+.today header .sp{flex:1}
+.today .seg{display:flex;margin:0 14px 8px;background:var(--line);border-radius:7px;padding:2px}
+.today .seg button{flex:1;border:0;background:none;border-radius:5px;padding:4px;font-size:12px;font-weight:600;color:var(--muted)}
+.today .seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 1px rgba(0,0,0,.06)}
+.alerts{flex:1;overflow:auto;padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.al{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 11px;display:grid;grid-template-columns:auto 1fr;gap:3px 9px}
+.al .sev{grid-row:1/4;width:8px;height:8px;border-radius:50%;margin-top:5px}
+.al .t{font-weight:700;font-size:12.5px;line-height:1.3}
+.al .m{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11.5px}
+.al .go{display:flex;justify-content:space-between;align-items:center}
+.al .go button{border:0;background:none;color:var(--rev);font-weight:700;font-size:12px;padding:0}
+.sev-h{background:var(--danger)}.sev-m{background:var(--warn)}.sev-i{background:var(--rev)}
+
+/* Drawer */
+.drawer{position:absolute;top:0;right:0;bottom:0;width:440px;max-width:100%;background:var(--surface);border-left:1px solid var(--line-2);box-shadow:-12px 0 28px rgba(20,22,26,.12);z-index:20;display:flex;flex-direction:column}
+.drawer[hidden]{display:none}
+.drawer .dh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.drawer .db{padding:14px 16px;overflow:auto;display:flex;flex-direction:column;gap:14px;flex:1}
+.drawer .df{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.kv>div{padding:6px 10px;border-bottom:1px solid var(--line);min-width:0;overflow:hidden;text-overflow:ellipsis}
+.kv>div:nth-child(odd){color:var(--muted);font-size:12px;background:#FAFAF9}
+.kv>div:nth-last-child(-n+2){border-bottom:0}
+
+/* Popovers & menus */
+.pop{position:fixed;z-index:60;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;box-shadow:0 10px 30px rgba(20,22,26,.16);padding:6px;min-width:220px;max-height:70vh;overflow:auto}
+.pop[hidden]{display:none}
+.pop .mi{display:flex;width:100%;align-items:center;gap:8px;border:0;background:none;text-align:left;padding:7px 10px;border-radius:6px;font-size:12.5px}
+.pop .mi:hover{background:var(--hover)}
+.pop .mh{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:6px 10px 2px;font-weight:700}
+.pop .val{font-weight:700;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legend{width:560px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.legend h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.legend table{border-collapse:collapse;width:100%;font-size:12px}
+.legend td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.legend td:first-child{width:150px}
+.sw{display:inline-block;width:42px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.08);vertical-align:middle;margin-right:6px}
+.colpick{width:300px}
+.colpick label{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;font-size:12.5px}
+.colpick label:hover{background:var(--hover)}
+.colpick label span{flex:1}
+.colpick .mv{border:0;background:none;color:var(--faint);padding:0 3px;font-size:12px}
+.colpick .mv:hover{color:var(--text)}
+
+/* Details */
+.detail{flex:1;min-height:0;overflow:auto}
+.dhead{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 20px 0;display:flex;flex-direction:column;gap:10px}
+.crumb{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.crumb button{border:0;background:none;color:var(--rev);font-weight:600;padding:0}
+.drow{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.dtitle{flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px}
+.dtitle .l1{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dtitle h1{margin:0;font-family:var(--font-mono);font-size:24px;font-weight:600;letter-spacing:-.01em}
+.dtitle .client{font-size:15px;font-weight:700}
+.dtitle .l2{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sum{display:grid;grid-template-columns:repeat(4,auto);gap:0;border:1px solid var(--line);border-radius:9px;overflow:visible;position:relative}
+.sum>div{padding:8px 14px;border-right:1px solid var(--line);min-width:110px}
+.sum>div:last-child{border-right:0}
+.sum .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.sum .v{font-size:16px;font-weight:800;margin-top:2px;white-space:nowrap}
+.sum .tip{position:absolute;top:calc(100% + 6px);right:0;width:340px;background:var(--ink);color:#EDEEF0;border-radius:8px;padding:10px 12px;font-size:12px;z-index:30;display:none}
+.sum:hover .tip{display:block}
+.tip table{width:100%;border-collapse:collapse}
+.tip td{padding:2px 4px}
+.tip td:not(:first-child){text-align:right}
+.steprow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;flex:1;min-width:520px}
+.step{display:flex;align-items:center;gap:7px;flex:1;font-size:12px;font-weight:600;color:var(--faint);white-space:nowrap}
+.step .c{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;font-size:10px;flex:none;background:var(--surface)}
+.step .bar{flex:1;height:2px;background:var(--line-2);min-width:12px}
+.step.done{color:var(--text)}
+.step.done .c{background:var(--ink);border-color:var(--ink);color:#fff}
+.step.done .bar{background:var(--ink)}
+.step.cur{color:var(--text)}
+.step.cur .c{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.step.cur .c::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.step:last-child{flex:none}
+.acts{display:flex;gap:6px;align-items:center;position:relative}
+.reqtip{position:absolute;top:calc(100% + 6px);left:0;background:var(--ink);color:#EDEEF0;border-radius:8px;padding:10px 12px;font-size:12px;width:260px;z-index:30;display:none}
+.reqtip ul{margin:4px 0 0;padding-left:16px}
+.pwrap{position:relative}
+.pwrap:hover .reqtip{display:block}
+.dtabs{display:flex;gap:2px;margin-top:2px;overflow-x:auto}
+.dtabs button{background:none;border:0;padding:9px 12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;font-size:13px}
+.dtabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+.dtabs .n{font-size:11px;color:var(--faint);margin-left:3px}
+.dbody{padding:16px 20px 40px;display:flex;flex-direction:column;gap:16px;max-width:1400px}
+.banner{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;font-size:12.5px}
+.banner.warn{background:var(--warn-soft);border:1px solid #F1D48A;color:#6B4800}
+.banner.info{background:#EAF1FB;border:1px solid #C9DBF4;color:#16407A}
+.banner.lock{background:#E5F1E8;border:1px solid #B9D9C1;color:var(--ok-dark)}
+.banner.cancel{background:#F1F1F0;border:1px solid var(--line-2);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.card>h3{margin:0;padding:11px 14px;font-size:13px;font-weight:800;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.card>h3 .sp{flex:1}
+.card .cb{padding:12px 14px}
+.form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px}
+.fld{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fld>label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.fld .in{display:flex;align-items:center;border:1px solid var(--line-2);border-radius:6px;height:30px;background:var(--surface);overflow:hidden}
+.fld .in:focus-within{border-color:var(--rev);box-shadow:0 0 0 2px #D5E4F8}
+.fld .in input,.fld .in select{flex:1;min-width:0;border:0;height:100%;padding:0 8px;background:transparent;font-size:12.5px;outline:none}
+.fld .in .tg{border:0;border-left:1px solid var(--line);background:none;width:26px;height:100%;color:var(--faint);font-weight:700}
+.fld .in .tg:hover{color:var(--text);background:var(--canvas)}
+.fld.empty .in{background:repeating-linear-gradient(135deg,#FAFAF9 0 6px,#F2F2F0 6px 12px)}
+.fld.empty .in input,.fld.empty .in select{color:var(--faint)}
+.fld.empty .in .tg{color:var(--text);background:var(--line)}
+.fld.f-blue .in{background:var(--f-blue)}
+.fld.f-lgreen .in{background:var(--f-lgreen)}
+.fld.f-green .in{background:var(--f-green)}
+.fld.f-yellow .in{background:var(--f-yellow)}
+.fld.f-purple .in{background:var(--f-purple)}
+.fld .hint{font-size:11px;color:var(--muted)}
+.span2{grid-column:span 2}
+.span3{grid-column:1/-1}
+.pair{display:flex;gap:6px}
+.pair .fld{flex:1}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.cols-op{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px}
+.checks label{display:flex;gap:6px;align-items:center;font-size:12.5px}
+.linked{display:flex;flex-direction:column;gap:6px}
+.lk{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:7px}
+.lk button{border:0;background:none;color:var(--rev);font-weight:700;font-family:var(--font-mono);font-size:12px;padding:0}
+.lk.total{background:var(--canvas);font-weight:700}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+.t th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:7px 10px;border-bottom:1px solid var(--line-2);background:#FAFAF9;white-space:nowrap}
+.t td{padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t td.num,.t th.num{text-align:right;white-space:nowrap}
+.t select,.t input{height:26px;border:1px solid var(--line-2);border-radius:5px;padding:0 6px;font-size:12px;background:var(--surface);max-width:100%}
+.t tr.add td{color:var(--rev);font-weight:700;cursor:pointer}
+.t tr.add td:hover{background:var(--hover)}
+.t tfoot td{font-weight:800;border-bottom:0}
+.fx{font-size:12px;color:var(--muted);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.link{color:var(--rev);font-weight:600;cursor:pointer;border:0;background:none;padding:0;font-size:inherit}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:26px;text-align:center;background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}
+.drop b{color:var(--text);font-size:14px}
+.dgrp{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.dg h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;gap:6px}
+.file{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);margin-bottom:6px}
+.file .ext{width:32px;height:38px;border-radius:4px;display:grid;place-items:center;font-size:9.5px;font-weight:800;color:#fff;flex:none}
+.file .nm{font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .mt{font-size:11px;color:var(--muted)}
+.file>div{min-width:0}
+.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}
+.ph{aspect-ratio:4/3;max-width:100%;border-radius:6px;position:relative;overflow:hidden;border:1px solid var(--line)}
+.ph span{position:absolute;left:5px;bottom:4px;font-size:10px;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.rcp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid var(--line-2);border-radius:7px;padding:5px 6px;min-height:34px;background:var(--surface)}
+.rcp .r{display:inline-flex;align-items:center;gap:4px;height:24px;border-radius:12px;background:var(--canvas);border:1px solid var(--line-2);padding:0 4px 0 9px;font-size:12px}
+.rcp .r button{border:0;background:none;width:18px;height:18px;border-radius:50%;color:var(--muted)}
+.rcp .r button:hover{background:var(--line)}
+.rcp .r.grp{background:#EAF1FB;border-color:#C9DBF4}
+.rcp input{border:0;flex:1;min-width:140px;height:24px;outline:none;font-size:12.5px}
+.hist{display:flex;flex-direction:column}
+.hist .h{display:grid;grid-template-columns:130px 32px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.hist .h .ts{font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
+.hist del{color:var(--faint)}
+textarea{width:100%;border:1px solid var(--line-2);border-radius:7px;padding:9px 10px;font-size:12.5px;line-height:1.5;resize:vertical;background:var(--surface)}
+.ok-note{color:var(--ok);font-weight:700;font-size:12px}
+
+/* Modal */
+.ovl{position:fixed;inset:0;background:rgba(18,20,24,.45);z-index:80;display:grid;place-items:center;padding:20px}
+.ovl[hidden]{display:none}
+.modal{background:var(--surface);border-radius:12px;width:min(880px,100%);max-height:calc(100% - 20px);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal .mh{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.modal .mh h2{margin:0;font-size:16px;font-weight:800}
+.modal .mb{padding:14px 18px;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px}
+.modal .mf{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.mrow{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.mrow>label{font-size:11.5px;color:var(--muted);font-weight:700}
+.mrow input,.mrow select{height:30px;border:1px solid var(--line-2);border-radius:6px;padding:0 8px;font-size:12.5px;width:100%;background:var(--surface)}
+.tpls{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tpls button{border:1px solid var(--line-2);background:var(--surface);border-radius:15px;padding:4px 11px;font-size:12px;font-weight:600}
+.tpls button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.body-prev{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#FCFCFB;font-size:12.5px;line-height:1.55;white-space:pre-wrap}
+.body-prev mark{background:#FFF0B8;border-radius:3px;padding:0 2px}
+.att label{display:flex;gap:7px;align-items:center;font-size:12px;padding:4px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:9px;font-weight:600;font-size:12.5px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast[hidden]{display:none}
+.confirm{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;box-shadow:0 10px 30px rgba(20,22,26,.16);padding:12px;width:260px;z-index:40;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.confirm[hidden]{display:none}
+.rolebar{background:#2B2F36;color:#E9EAEC;font-size:12px;padding:6px 16px;display:flex;gap:10px;align-items:center}
+.rolebar[hidden]{display:none}
+.rolebar b{color:var(--accent)}
+
+@media (max-width: 1100px){
+  .today{position:absolute;right:0;top:0;bottom:0;z-index:15;box-shadow:-12px 0 28px rgba(20,22,26,.12)}
+  .form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols-op,.cols2{grid-template-columns:1fr}
+}
+@media (max-width: 760px){
+  .app{--sbw:56px}
+  .app .nav .lbl,.app .nav .cnt,.app .brand .txt,.app .sb-foot .lbl{display:none}
+  .me .who,.search kbd,.top .newlbl{display:none}
+  .stepper{min-width:0}
+  .step .lbl{display:none}
+  .form{grid-template-columns:1fr}
+  .sum{grid-template-columns:repeat(2,auto)}
+  .modal .mb{grid-template-columns:1fr}
+  .kv{grid-template-columns:110px 1fr}
+  .dhead,.dbody{padding-left:16px;padding-right:16px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="app" id="app">
+  <aside class="sb">
+    <div class="brand"><div class="wm">Q<b>4</b>RAIL</div><div class="txt"><small>ERP · SPEDYCJA</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sb-foot"><button id="collapse" title="Zwiń menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 6l-6 6 6 6"/></svg><span class="lbl">Zwiń menu</span></button></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="gsearch" type="text" placeholder="Szukaj: nr zlecenia, nr kontenera, klient…" autocomplete="off"><kbd>/</kbd></div>
+      <div class="sp"></div>
+      <button class="btn primary" id="newOrder"><span style="font-size:16px;line-height:0">+</span><span class="newlbl">Nowe zlecenie</span></button>
+      <button class="iconbtn" id="bell" title="Powiadomienia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="dot" id="bellcnt">6</span></button>
+      <button class="me" id="me"><span class="op" id="meBadge">KS</span><span class="who"><b id="meName">KS · Opiekun</b><span id="meRole">Podgląd jako: Opiekun</span></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+    </header>
+    <div class="rolebar" id="rolebar" hidden>Podgląd jako: <b>Biuro Szanghaj</b> · widoczne są tylko zlecenia przypisane do biura, bez kwot. Możesz dodawać zdjęcia z załadunku i dokumenty handlowe.<span style="flex:1"></span><button class="btn sm" id="roleBack">Wróć do widoku opiekuna</button></div>
+
+    <!-- LIST -->
+    <section class="view" id="vList">
+      <div class="lhead">
+        <div class="ltitle"><h1>Zlecenia</h1><span class="meta" id="lmeta"></span></div>
+        <div class="vtabs" id="vtabs"></div>
+      </div>
+      <div class="fbar">
+        <div class="grp"><span class="lab">OP</span><div class="opsel" id="opsel"></div></div>
+        <select id="fKlient" aria-label="Klient"></select>
+        <select id="fTyp1" aria-label="Typ 1"></select>
+        <select id="fStatus" aria-label="Status"></select>
+        <select id="fRozl" aria-label="Status rozliczenia"></select>
+        <div class="grp"><span class="lab">ETD</span><input type="date" id="fEtdFrom" aria-label="ETD od"><span class="muted">–</span><input type="date" id="fEtdTo" aria-label="ETD do"></div>
+        <input type="text" id="fText" placeholder="Szukaj w wynikach…">
+        <span class="sp"></span>
+        <button class="btn sm" id="bLegend" title="Legenda kolorów"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Legenda</button>
+        <button class="btn sm" id="bCols"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM10 5v14M15 5v14"/></svg>Kolumny</button>
+        <button class="btn sm" id="bExport"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Eksport do Excela</button>
+        <button class="btn sm" id="bToday">Na dziś <b style="color:var(--accent)" id="todayCnt">6</b></button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="work">
+        <div class="gridwrap" id="gridwrap"><table class="grid" id="grid"></table></div>
+        <aside class="today" id="today" hidden>
+          <header><h2>Na dziś</h2><span class="d">czw. 2026-11-05</span><span class="sp"></span><button class="iconbtn" id="todayClose" title="Zwiń panel" style="width:28px;height:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></header>
+          <div class="seg" id="todaySeg"><button data-s="mine">Moje</button><button data-s="all" class="on">Cały dział</button></div>
+          <div class="alerts" id="alerts"></div>
+        </aside>
+        <aside class="drawer" id="drawer" hidden></aside>
+      </div>
+    </section>
+
+    <!-- DETAIL -->
+    <section class="view" id="vDetail" hidden>
+      <div class="detail" id="detail"></div>
+    </section>
+  </div>
+</div>
+
+<div class="pop" id="pop" hidden></div>
+<div class="ovl" id="ovl" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TODAY='2026-11-05';
+const RATES={PLN:1,USD:3.9821,EUR:4.2610};
+const fmtN=v=>{const neg=v<0;let [i,d]=Math.abs(v).toFixed(2).split('.');i=i.replace(/\B(?=(\d{3})+(?!\d))/g,' ');return (neg?'−':'')+i+','+d};
+const fmtA=a=>fmtN(a.v)+' '+a.c;
+const fmtP=v=>fmtN(v)+' PLN';
+const A=(v,c,o={})=>Object.assign({v,c},o);
+const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const STATUSES=['Nowe','Zaplanowane','Podjęte','W drodze','Dojeżdża','Zakończone'];
+const OPEN=['Nowe','Zaplanowane','Podjęte','W drodze','Dojeżdża'];
+const ROZL=['Do zafakturowania','Zafakturowane','Koszty niekompletne','Rozliczone','Miesiąc zamknięty'];
+const SVC={kol:'Kolej',odp:'Odprawa celna',dos:'Dostawa drogowa + Postój',ubz:'Ubezpieczenie CARGO',skl:'Składowanie',prz:'Przeładunek / Pozostałe',roz:'Rozformowanie'};
+const REVK=['kol','odp','dos','ubz','skl','prz','roz'];
+const COSTK=['kol','odp','dos','ubz','skl','prz'];
+const USERS={MS:'Marcin S. · kierownik',JK:'JK · opiekun',KS:'KS · opiekun',PR:'PR · opiekun',MT:'MT · opiekun',BS:'Biuro Szanghaj'};
+const SUPPLIERS={dos:'TL Log Transport',odp:'CelPort Agencja Celna',ubz:'Cargo Protect',skl:'Magazyn DTA',prz:'Magazyn DTA'};
+const DICT={
+  klient:['Nordpol Meble','Viltex Odzież','Hydromix Armatura','Elektra RTV AGD','GTS Logistics'],
+  serwis:['Way-Easy','Way-Load','UPG','UP'],agent:['Sino Rail Link','Huaxin Forwarding'],
+  t1:['FCL','LCL','TRFCL','TRFTL','MPLT','ML','MDR'],t2:['TRFCL','TRFTL'],t3:['MPLT','ML'],
+  war:['EXW','FOB','FCA','CPT','DAP'],term:['Małaszewicze','Łódź Olechów','Sławków','Poznań Franowo'],op:['MS','JK','KS','PR','MT']
+};
+const FULLNAME={'Nordpol Meble':'Nordpol Meble Sp. z o.o.','Viltex Odzież':'Viltex Odzież S.A.','Hydromix Armatura':'Hydromix Armatura Sp. z o.o.','Elektra RTV AGD':'Elektra RTV AGD Sp. z o.o.','GTS Logistics':'GTS Logistics'};
+const opBadge=(u,lg)=>`<span class="op${lg?' lg':''}" style="background:var(--u-${u})" title="${esc(USERS[u]||u)}">${u}</span>`;
+const stChip=s=>`<span class="chip st-${s.replace(/\s/g,'')}">${s}</span>`;
+const rzChip=s=>`<span class="chip rz-${s.replace(/\s/g,'')}">${s==='Miesiąc zamknięty'?'<span class="lock">🔒</span>':''}${s}</span>`;
+const dash='<span class="dash">-</span>';
+
+/* ---------- sample data (fictional) ---------- */
+let ORDERS=[
+ {id:'QAR100241',fv:'',nr:'QAR100241',op:'JK',klient:'Nordpol Meble',serwis:'Way-Easy',agent:'Huaxin Forwarding',t1:'FCL',t2:'TRFCL',t3:'',kont:'',kdrob:'',war:'FOB',zal:'Ningbo',term:'Małaszewicze',odb:'Lubawa, ul. Fabryczna 3',got:'',etd:'',eta:'',pod:'',status:'Nowe',rozl:'Do zafakturowania',ref:'PO-77901',uwagi:'Czekamy na potwierdzenie gotowości od dostawcy',
+  r:{kol:A(3900,'USD'),dos:A(1800,'PLN'),ubz:A(95,'USD')},k:{},cargo:{ctn:'',kg:'',cbm:''},missing:['data gotowości / podjęcia','planowana ETD']},
+ {id:'QAR100238',fv:'FV/112/2026',nr:'QAR100238',op:'MS',klient:'Viltex Odzież',serwis:'Way-Load',agent:'Sino Rail Link',t1:'LCL',t2:'TRFTL',t3:'',kont:'16 ctns, 394 kg, 1.8 CBM',lcl:true,kdrob:'MSKU4410938',war:'EXW',zal:'Yiwu',term:'Łódź Olechów',odb:'Łódź, ul. Rokicińska 154',got:'2026-11-12',etd:'2026-11-18',eta:'',pod:'',status:'Zaplanowane',rozl:'Do zafakturowania',ref:'PO-77887',uwagi:'Plan realizacji wysłany 2026-11-03',
+  r:{kol:A(410,'USD'),dos:A(1200,'PLN'),ubz:A(80,'USD')},k:{kol:A(290,'USD',{s:'rez',d:'Sino Rail Link'}),dos:A(950,'PLN',{s:'rez',d:'TL Log Transport'}),ubz:A(45,'USD',{s:'rez',d:'Cargo Protect'})},cargo:{ctn:16,kg:394,cbm:1.8},missing:['data podjęcia','dokumenty handlowe']},
+ {id:'QAR100240',fv:'',nr:'QAR100240',op:'MT',klient:'Elektra RTV AGD',serwis:'Way-Load',agent:'Sino Rail Link',t1:'LCL',t2:'TRFTL',t3:'',kont:'24 ctns, 610 kg, 3.2 CBM',lcl:true,kdrob:'MSKU4410938',war:'EXW',zal:'Ningbo',term:'Poznań Franowo',odb:'Września, ul. Kolejowa 12',got:'2026-11-03',etd:'2026-11-10',eta:'',pod:'',status:'Zaplanowane',rozl:'Do zafakturowania',ref:'PO-77915',uwagi:'Dostawca potwierdził wydanie towaru',
+  r:{kol:A(560,'USD'),dos:A(1300,'PLN')},k:{kol:A(410,'USD',{s:'rez',d:'Sino Rail Link'}),dos:A(980,'PLN',{s:'rez',d:'TL Log Transport'})},cargo:{ctn:24,kg:610,cbm:3.2},missing:['dokumenty handlowe','zdjęcia z załadunku']},
+ {id:'QAR100236',fv:'FV/109/2026',nr:'QAR100236',op:'KS',klient:'Hydromix Armatura',serwis:'UPG',agent:'Huaxin Forwarding',t1:'FCL',t2:'TRFCL',t3:'',kont:'TGHU4821937',kdrob:'',war:'FOB',zal:'Shanghai',term:'Sławków',odb:'Kielce, ul. Zagnańska 97',got:'2026-10-23',etd:'2026-11-06',eta:'2026-11-24',pod:'',status:'Podjęte',rozl:'Do zafakturowania',ref:'PO-77812',uwagi:'Dokumenty handlowe wysłane do klienta 2026-10-24',
+  r:{kol:A(4200,'USD'),odp:A(450,'PLN'),dos:A(2400,'PLN'),ubz:A(120,'USD')},k:{kol:A(3350,'USD',{s:'zar',d:'Huaxin Forwarding',inv:'HXF-26-0914'}),odp:A(300,'PLN',{s:'rez',d:'CelPort Agencja Celna'}),dos:A(1850,'PLN',{s:'rez',d:'TL Log Transport'}),ubz:A(70,'USD',{s:'zar',d:'Cargo Protect',inv:'CP/10/2291'})},cargo:{ctn:312,kg:18420,cbm:58.4},verified:false,missing:[],shanghai:true},
+ {id:'QAR100239',fv:'',nr:'QAR100239',op:'KS',klient:'Nordpol Meble',serwis:'Way-Easy',agent:'Huaxin Forwarding',t1:'FCL',t2:'TRFCL',t3:'',kont:'TGHU6610045',kdrob:'',war:'FOB',zal:'Ningbo',term:'Małaszewicze',odb:'Lubawa, ul. Fabryczna 3',got:'2026-11-05',etd:'2026-11-05',eta:'',pod:'',status:'Zaplanowane',rozl:'Do zafakturowania',ref:'PO-77894',uwagi:'Pilne – wyjazd dziś',
+  r:{kol:A(3950,'USD'),dos:A(2100,'PLN')},k:{kol:A(3100,'USD',{s:'rez',d:'Huaxin Forwarding'})},cargo:{ctn:208,kg:14800,cbm:61.2},missing:[],docsEarly:true,warn:'Typ 2 = TRFCL, brak kosztu Dostawa drogowa z dostawcą',shanghai:true},
+ {id:'QAR100233',fv:'FV/105/2026',nr:'QAR100233',op:'PR',klient:'Elektra RTV AGD',serwis:'UP',agent:'Sino Rail Link',t1:'FCL',t2:'',t3:'',kont:'CSLU2209481',kdrob:'',war:'FOB',zal:'Shenzhen',term:'Poznań Franowo',odb:'Września, ul. Kolejowa 12',got:'2026-10-14',etd:'2026-10-19',eta:'2026-11-07',pod:'2026-11-08',status:'Dojeżdża',rozl:'Zafakturowane',invoiced:true,ref:'PO-77750',uwagi:'Odbiór z terminalu przez klienta',
+  r:{kol:A(4500,'USD'),odp:A(500,'PLN'),ubz:A(130,'USD')},k:{kol:A(3610,'USD',{s:'zar',d:'Sino Rail Link',inv:'SRL-2610-077'}),odp:A(350,'PLN',{s:'zar',d:'CelPort Agencja Celna',inv:'CP/AC/1182'}),ubz:A(75,'USD',{s:'zar',d:'Cargo Protect',inv:'CP/10/2254'})},cargo:{ctn:540,kg:12350,cbm:66.0},verified:true,missing:[]},
+ {id:'QAR100231',fv:'FV/101/2026',nr:'QAR100231',op:'JK',klient:'GTS Logistics',serwis:'Way-Easy',agent:'Sino Rail Link',t1:'FCL',t2:'TRFCL',t3:'',kont:'TGHU5530172',soc:true,kdrob:'',war:'EXW',zal:"Xi'an",term:'Małaszewicze',odb:'Gliwice, ul. Portowa 28',got:'2026-10-09',etd:'2026-10-16',eta:'2026-11-03',pod:'',status:'W drodze',rozl:'Zafakturowane',invoiced:true,ref:'PO-77701',uwagi:'Kontener własny – po rozładunku sprzedaż (QAR100232)',
+  r:{kol:A(4100,'USD'),dos:A(2600,'PLN'),ubz:A(110,'USD')},k:{kol:A(3300,'USD',{s:'zar',d:'Sino Rail Link',inv:'SRL-2610-052'}),dos:A(2000,'PLN',{s:'zar',d:'TL Log Transport',inv:'TL/2026/1043'}),ubz:A(65,'USD',{s:'zar',d:'Cargo Protect',inv:'CP/10/2240'})},cargo:{ctn:120,kg:21600,cbm:64.5},verified:true,linked:'QAR100232',missing:[]},
+ {id:'QAR100232',fv:'FV/102/2026',nr:'QAR100232',op:'JK',klient:'Nordpol Meble',serwis:'',agent:'',t1:'FCL',t2:'',t3:'',kont:'TGHU5530172',kdrob:'',war:'',zal:'',term:'',odb:'',got:'',etd:'',eta:'',pod:'',status:'W drodze',rozl:'Zafakturowane',invoiced:true,ref:'PO-77905',uwagi:'Sprzedaż kontenera po rozładunku QAR100231',
+  r:{prz:A(2300,'EUR')},k:{prz:A(2600,'EUR',{s:'zar',d:'Sino Rail Link',inv:'SRL-CS-0031'})},cargo:{ctn:'',kg:'',cbm:''},linked:'QAR100231',missing:[]},
+ {id:'QAR100237',fv:'FV/111/2026',nr:'QAR100237',op:'MT',klient:'GTS Logistics',serwis:'UPG',agent:'Huaxin Forwarding',t1:'FCL',t2:'TRFCL',t3:'',kont:'TCNU3398210',kdrob:'',war:'FOB',zal:'Chongqing',term:'Sławków',odb:'Warszawa, ul. Annopol 4',got:'2026-10-20',etd:'2026-10-25',eta:'2026-11-12',pod:'',status:'W drodze',rozl:'Zafakturowane',invoiced:true,ref:'PO-77768',uwagi:'Monitoring: pociąg w okolicach Dostyk',
+  r:{kol:A(4150,'USD'),dos:A(1900,'PLN'),ubz:A(100,'USD')},k:{kol:A(3290,'USD',{s:'zar',d:'Huaxin Forwarding',inv:'HXF-26-0950'}),dos:A(1500,'PLN',{s:'zar',d:'TL Log Transport',inv:'TL/2026/1077'}),ubz:A(60,'USD',{s:'zar',d:'Cargo Protect',inv:'CP/10/2263'})},cargo:{ctn:410,kg:16900,cbm:59.8},verified:true,missing:[]},
+ {id:'QAR100228',fv:'FV/098/2026',nr:'QAR100228',op:'MT',klient:'Viltex Odzież',serwis:'Way-Load',agent:'Sino Rail Link',t1:'MDR',t2:'TRFTL',t3:'ML',kont:'42 ctns, 1 180 kg, 6.4 CBM',lcl:true,tl:true,sklad:true,kdrob:'CBHU7120455',war:'EXW',zal:'Yiwu',term:'Łódź Olechów',odb:'Łódź, ul. Rokicińska 154',got:'2026-10-02',etd:'2026-10-08',eta:'2026-10-27',pod:'2026-10-30',status:'Zakończone',rozl:'Koszty niekompletne',invoiced:true,ref:'PO-77655',uwagi:'Towar na magazynie 3 dni – naliczone składowanie',
+  r:{kol:A(980,'USD'),dos:A(1400,'PLN'),skl:A(600,'PLN'),prz:A(300,'PLN'),roz:A(350,'PLN')},k:{kol:A(720,'USD',{s:'zar',d:'Sino Rail Link',inv:'SRL-2610-011'}),dos:A(1050,'PLN',{s:'zar',d:'TL Log Transport',inv:'TL/2026/0998'}),skl:A(360,'EUR',{s:'rez',d:'Magazyn DTA',since:'2026-10-15'}),prz:A(180,'PLN',{s:'zar',d:'Magazyn DTA',inv:'DTA/10/0412'})},cargo:{ctn:42,kg:1180,cbm:6.4},verified:true,missing:['faktura kosztowa: Składowanie (Magazyn DTA)']},
+ {id:'QAR100225',fv:'FV/095/2026',nr:'QAR100225',op:'MS',klient:'Hydromix Armatura',serwis:'UPG',agent:'Huaxin Forwarding',t1:'FCL',t2:'TRFCL',t3:'',kont:'MRKU7712054',kdrob:'',war:'FOB',zal:'Qingdao',term:'Sławków',odb:'Kielce, ul. Zagnańska 97',got:'2026-09-21',etd:'2026-09-26',eta:'2026-10-15',pod:'2026-10-17',status:'Zakończone',rozl:'Rozliczone',invoiced:true,ref:'PO-77590',uwagi:'Rozliczone, gotowe do zamknięcia miesiąca',
+  r:{kol:A(4300,'USD'),odp:A(450,'PLN'),dos:A(2300,'PLN'),ubz:A(120,'USD')},k:{kol:A(3450,'USD',{s:'zar',d:'Huaxin Forwarding',inv:'HXF-26-0861'}),odp:A(300,'PLN',{s:'zar',d:'CelPort Agencja Celna',inv:'CP/AC/1120'}),dos:A(1800,'PLN',{s:'zar',d:'TL Log Transport',inv:'TL/2026/0951'}),ubz:A(70,'USD',{s:'zar',d:'Cargo Protect',inv:'CP/09/2101'})},cargo:{ctn:280,kg:19750,cbm:57.1},verified:true,missing:[]},
+ {id:'QAR100219',fv:'FV/090/2026',nr:'QAR100219',op:'KS',klient:'Elektra RTV AGD',serwis:'Way-Load',agent:'Sino Rail Link',t1:'LCL',t2:'',t3:'MPLT',kont:'8 ctns, 210 kg, 0.9 CBM',lcl:true,kdrob:'TCNU1180236',war:'EXW',zal:'Guangzhou',term:'Łódź Olechów',odb:'Września, ul. Kolejowa 12',got:'2026-09-10',etd:'2026-09-15',eta:'2026-10-04',pod:'2026-10-06',status:'Zakończone',rozl:'Miesiąc zamknięty',invoiced:true,ref:'PO-77512',uwagi:'Miesiąc 2026-10 zamknięty',
+  r:{kol:A(380,'USD'),prz:A(220,'PLN')},k:{kol:A(260,'USD',{s:'ksi',d:'Sino Rail Link',inv:'SRL-2609-140'}),prz:A(140,'PLN',{s:'ksi',d:'Magazyn DTA',inv:'DTA/09/0377'})},cargo:{ctn:8,kg:210,cbm:0.9},verified:true,missing:[]},
+ {id:'odprawa-celna-1105',fv:'',nr:'odprawa celna',special:true,op:'PR',klient:'GTS Logistics',serwis:'',agent:'',t1:'TRFTL',t2:'',t3:'',kont:'',kdrob:'',war:'',zal:'',term:'',odb:'Poznań, ul. Gnieźnieńska 40',got:'',etd:'',eta:'',pod:'2026-11-05',status:'Zakończone',rozl:'Do zafakturowania',ref:'PO-77921',uwagi:'Odprawa importowa dla oddziału Poznań',
+  r:{odp:A(650,'PLN')},k:{odp:A(420,'PLN',{s:'zar',d:'CelPort Agencja Celna',inv:'CP/AC/1203'})},cargo:{ctn:'',kg:'',cbm:''},missing:['faktura sprzedażowa']},
+];
+const byId=id=>ORDERS.find(o=>o.id===id);
+function calc(o){let r=0,c=0,byC={};
+  for(const k in o.r){const a=o.r[k];r+=a.v*RATES[a.c];(byC[a.c]??={r:0,c:0}).r+=a.v}
+  for(const k in o.k){const a=o.k[k];c+=a.v*RATES[a.c];(byC[a.c]??={r:0,c:0}).c+=a.v}
+  return {r,c,p:r-c,m:r?((r-c)/r*100):0,byC}}
+function hasRez(o){return Object.values(o.k).some(a=>a.s==='rez')}
+
+/* ---------- state ---------- */
+const S={role:'op',me:'KS',tab:'all-open',ops:new Set(),klient:'',t1:'',status:'',rozl:'',etdFrom:'',etdTo:'',text:'',vchips:[],sort:null,todayScope:'all',sel:null,dtab:'op'};
+let COLS=[];
+function defCols(){
+ const c=[];const add=(k,l,g,w,o={})=>c.push(Object.assign({k,l,g,w,on:true},o));
+ add('fv','Nr faktury','Zlecenie',96,{pin:0}); add('nr','Nr przesyłki','Zlecenie',128,{pin:1}); add('op','OP','Zlecenie',44,{pin:2,cls:'c'});
+ add('status','Status','Status',104); add('rozl','Rozliczenie','Status',150);
+ add('klient','Klient','Operacja',140); add('serwis','Serwis','Operacja',76); add('agent','Agent','Operacja',128);
+ add('t1','Typ 1','Operacja',56); add('t2','Typ 2','Operacja',58); add('t3','Typ 3','Operacja',56);
+ add('kont','Nr kontenera / LCL','Operacja',178,{mono:true}); add('kdrob','Kontener drobnica','Operacja',118,{mono:true});
+ add('war','Warunki','Operacja',66); add('zal','Załadunek','Operacja',88); add('term','Terminal dostawy','Operacja',116); add('odb','Odbiorca / Miejsce dostawy','Operacja',184);
+ add('got','Gotowość / Podjęcie','Operacja',96,{date:1}); add('etd','ETD','Operacja',92,{date:1}); add('eta','ETA kolej','Operacja',92,{date:1}); add('pod','Data podstawienia','Operacja',100,{date:1});
+ const RL={kol:'Kolej_p',odp:'Odprawa celna_p',dos:'Dostawa drogowa + Postój_p',ubz:'Ubezpieczenie CARGO_p',skl:'Składowanie_p',prz:'Przeładunek/Pozostałe_p',roz:'Rozformowanie_p'};
+ for(const k of REVK) add('r_'+k,RL[k],'Przychody',114,{amt:'r',sk:k});
+ const CL=[['k','kol','Kolej_k'],['k','odp','Odprawa celna_k'],['d','odp','Dostawca Odprawa celna'],['k','dos','Dostawa drogowa + Postój_k'],['d','dos','Dostawca Dostawa drogowa'],['k','ubz','Ubezpieczenie CARGO_k'],['d','ubz','Dostawca Ubezpieczenie'],['k','skl','Składowanie_k'],['d','skl','Dostawca Składowanie'],['k','prz','Przeładunek / Pozostałe_k'],['d','prz','Dostawca Przeładunek']];
+ for(const [t,k,l] of CL) t==='k'?add('k_'+k,l,'Koszty',114,{amt:'k',sk:k}):add('d_'+k,l,'Koszty',138,{sup:k});
+ add('w_r','Przychód PLN','Wynik',118,{wy:'r'}); add('w_c','Koszt PLN','Wynik',118,{wy:'c'}); add('w_p','Zysk PLN','Wynik',118,{wy:'p'});
+ add('ref','Nr przesyłki klienta','Inne',118,{mono:true}); add('uwagi','Uwagi','Inne',260);
+ return c;}
+COLS=defCols();
+const MONEY_GROUPS=['Przychody','Koszty','Wynik'];
+const visCols=()=>COLS.filter(c=>c.on&&!(S.role==='bs'&&MONEY_GROUPS.includes(c.g)));
+
+/* ---------- cell logic: status -> colours ---------- */
+function sIdx(o){return STATUSES.indexOf(o.status)}
+function fill(o,c){
+ if(o.status==='Anulowane')return '';
+ const i=sIdx(o);
+ switch(c.k){
+  case 'got': if(o.status==='Zaplanowane')return 'f-blue'; if(i>=2)return 'f-lgreen'; return '';
+  case 'etd': if(i>=3&&o.invoiced)return 'f-green'; if(o.status==='Zaplanowane'||o.status==='Podjęte')return 'f-blue'; if(i>=3)return 'f-lgreen'; return '';
+  case 'pod': if(o.status==='Dojeżdża')return 'f-yellow'; if(o.status==='Zakończone')return 'f-green'; return '';
+  case 'kont': if(o.soc)return 'f-yellow'; if(o.tl)return 'f-purple'; return '';
+  case 'r_skl': return o.sklad?'f-red':'';
+ }
+ return '';
+}
+function valText(o,c){
+ if(c.amt){const a=(c.amt==='r'?o.r:o.k)[c.sk];return a?fmtA(a):'-'}
+ if(c.sup){const a=o.k[c.sup];return a?.d||'-'}
+ if(c.wy){const x=calc(o);return fmtP(x[c.wy])}
+ return o[c.k]||'-';
+}
+function sortVal(o,c){
+ if(c.amt){const a=(c.amt==='r'?o.r:o.k)[c.sk];return a?a.v*RATES[a.c]:-1e12}
+ if(c.wy)return calc(o)[c.wy];
+ if(c.k==='status')return STATUSES.indexOf(o.status);
+ return (valText(o,c)==='-'?'￿':valText(o,c)).toLowerCase();
+}
+function cellHtml(o,c){
+ switch(c.k){
+  case 'op': return opBadge(o.op);
+  case 'status': return stChip(o.status);
+  case 'rozl': return rzChip(o.rozl);
+  case 'nr': return `<span class="mono" style="font-weight:600">${esc(o.nr)}</span>${o.warn?` <span class="warn-ic" title="${esc(o.warn)}">⚠</span>`:''}`;
+  case 'kont': { if(!o.kont)return dash; const bold=sIdx(o)>=3&&!o.lcl; return `<span class="mono${bold?' b':''}">${esc(o.kont)}</span>${o.soc?' <span class="muted" style="font-size:10.5px;font-weight:700">SOC</span>':''}`;}
+ }
+ if(c.amt){const a=(c.amt==='r'?o.r:o.k)[c.sk];if(!a)return dash;
+   return c.amt==='r'?`<span class="rev">${fmtA(a)}</span>`:`<span class="cost${a.s==='rez'?' rez':''}" title="${a.s==='rez'?'Rezerwa – brak faktury kosztowej':'Faktura kosztowa '+(a.inv||'')}">${fmtA(a)}</span>`;}
+ if(c.sup){const a=o.k[c.sup];return a?.d?esc(a.d):dash}
+ if(c.wy){const x=calc(o);if(!Object.keys(o.r).length&&!Object.keys(o.k).length)return dash;const v=x[c.wy];
+   if(c.wy==='p')return v<0?`<span class="neg">▼ ${fmtP(v)}</span>`:`<span class="b">${fmtP(v)}</span>`;return fmtP(v)}
+ const v=o[c.k];if(!v)return dash;
+ return c.mono?`<span class="mono">${esc(v)}</span>`:esc(v);
+}
+
+/* ---------- filtering ---------- */
+const TABS=[
+ {id:'mine',l:'Moje otwarte',f:o=>o.op===S.me&&OPEN.includes(o.status)},
+ {id:'all-open',l:'Wszystkie otwarte',f:o=>OPEN.includes(o.status)},
+ {id:'etd-today',l:'Wyjeżdżają dziś',f:o=>o.etd===TODAY&&o.status!=='Anulowane'},
+ {id:'to-close',l:'Do zamknięcia',f:o=>o.status==='Zakończone'&&o.rozl!=='Miesiąc zamknięty'},
+ {id:'done',l:'Zrealizowane',f:o=>o.status==='Zakończone'||o.status==='Anulowane'},
+];
+function baseRows(){return ORDERS.filter(o=>S.role!=='bs'||o.shanghai||['QAR100238','QAR100240'].includes(o.id))}
+function rows(){
+ const t=TABS.find(t=>t.id===S.tab);
+ let r=baseRows().filter(t.f);
+ if(S.ops.size)r=r.filter(o=>S.ops.has(o.op));
+ if(S.klient)r=r.filter(o=>o.klient===S.klient);
+ if(S.t1)r=r.filter(o=>o.t1===S.t1);
+ if(S.status)r=r.filter(o=>o.status===S.status);
+ if(S.rozl)r=r.filter(o=>o.rozl===S.rozl);
+ if(S.etdFrom)r=r.filter(o=>o.etd&&o.etd>=S.etdFrom);
+ if(S.etdTo)r=r.filter(o=>o.etd&&o.etd<=S.etdTo);
+ for(const ch of S.vchips){const c=COLS.find(c=>c.k===ch.k);r=r.filter(o=>valText(o,c)===ch.v)}
+ if(S.text){const q=S.text.toLowerCase();r=r.filter(o=>[o.nr,o.kont,o.klient,o.ref,o.fv,o.uwagi,o.kdrob].join(' ').toLowerCase().includes(q))}
+ if(S.sort){const c=COLS.find(c=>c.k===S.sort.k);r=[...r].sort((a,b)=>{const x=sortVal(a,c),y=sortVal(b,c);return (x<y?-1:x>y?1:0)*S.sort.d})}
+ return r;
+}
+
+/* ---------- render list ---------- */
+function renderTabs(){
+ const base=baseRows();
+ $('#vtabs').innerHTML=TABS.map(t=>`<button class="${S.tab===t.id?'on':''}" data-tab="${t.id}">${t.l}<span class="n">${base.filter(t.f).length}</span></button>`).join('')+`<button class="save" data-tab="save">+ Zapisz widok</button>`;
+}
+function renderGrid(){
+ const cols=visCols();const R=rows();
+ let left=0;const pinLeft={};cols.filter(c=>c.pin!==undefined).forEach(c=>{pinLeft[c.k]=left;left+=c.w});
+ const lastPin=cols.filter(c=>c.pin!==undefined).slice(-1)[0]?.k;
+ const pinAttr=c=>c.pin!==undefined?` pin${c.k===lastPin?' pinlast':''}" style="left:${pinLeft[c.k]}px`:'';
+ // group header
+ const groups=[];for(const c of cols){const g=groups[groups.length-1];if(g&&g.g===c.g)g.n++,g.w+=c.w;else groups.push({g:c.g,n:1,w:c.w,pin:c.pin!==undefined})}
+ let gh='<tr class="g">';let gl=0;
+ for(const g of groups){gh+=`<th colspan="${g.n}" class="g-${g.g}${g.pin?' pin pinlast':''}"${g.pin?` style="left:0"`:''}>${g.g}</th>`}
+ gh+='</tr>';
+ let ch='<tr class="c">'+cols.map(c=>{const so=S.sort?.k===c.k?`<span class="so">${S.sort.d>0?'▲':'▼'}</span>`:'';
+   return `<th class="${pinAttr(c)}" data-k="${c.k}"><div class="hd"><span class="hl" data-sort="${c.k}" title="Sortuj">${esc(c.l)}</span>${so}<button class="fi" data-colf="${c.k}" title="Filtr kolumny" aria-label="Filtr kolumny ${esc(c.l)}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg></button></div></th>`}).join('')+'</tr>';
+ const total=cols.reduce((s,c)=>s+c.w,0);
+ const colg='<colgroup>'+cols.map(c=>`<col style="width:${c.w}px">`).join('')+'</colgroup>';
+ let body='';
+ if(!R.length)body=`<tr class="empty-row"><td colspan="${cols.length}">Brak zleceń dla wybranych filtrów. Usuń filtr lub zmień widok.</td></tr>`;
+ for(const o of R){
+   const locked=o.rozl==='Miesiąc zamknięty';
+   body+=`<tr data-id="${o.id}" class="${o.status==='Anulowane'?'cancel':''}${S.sel===o.id?' sel':''}">`+cols.map(c=>{
+     const f=fill(o,c);const num=c.amt||c.wy;const editable=!locked&&o.status!=='Anulowane'&&(c.date||c.amt);
+     return `<td class="${f}${num?' num':''}${c.cls?' '+c.cls:''}${pinAttr(c)}" data-k="${c.k}"${editable?' data-edit="1"':''}>${cellHtml(o,c)}</td>`}).join('')+'</tr>';
+ }
+ $('#grid').style.width=total+'px';
+ $('#grid').innerHTML=colg+'<thead>'+gh+ch+'</thead><tbody>'+body+'</tbody>';
+ const all=baseRows();
+ $('#lmeta').textContent=`${R.length} z ${all.length} zleceń · dziś ${TODAY}`;
+ renderChips();
+}
+function renderChips(){
+ const ch=[];
+ if(S.ops.size)ch.push({l:'OP: '+[...S.ops].join(', '),x:()=>{S.ops.clear();renderOpSel()}});
+ if(S.klient)ch.push({l:'Klient: '+S.klient,x:()=>{S.klient='';$('#fKlient').value=''}});
+ if(S.t1)ch.push({l:'Typ 1: '+S.t1,x:()=>{S.t1='';$('#fTyp1').value=''}});
+ if(S.status)ch.push({l:'Status: '+S.status,x:()=>{S.status='';$('#fStatus').value=''}});
+ if(S.rozl)ch.push({l:'Rozliczenie: '+S.rozl,x:()=>{S.rozl='';$('#fRozl').value=''}});
+ if(S.etdFrom||S.etdTo)ch.push({l:`ETD: ${S.etdFrom||'…'} – ${S.etdTo||'…'}`,x:()=>{S.etdFrom=S.etdTo='';$('#fEtdFrom').value=$('#fEtdTo').value=''}});
+ S.vchips.forEach((v,i)=>{const c=COLS.find(c=>c.k===v.k);ch.push({l:`${c.l} = ${v.v}`,x:()=>S.vchips.splice(i,1)})});
+ window._chipX=ch.map(c=>c.x);
+ $('#chips').innerHTML=ch.map((c,i)=>`<span class="fchip">${esc(c.l)}<button data-chipx="${i}" aria-label="Usuń filtr">×</button></span>`).join('')+(ch.length>1?`<button class="link" data-chipx="all" style="font-size:12px">Wyczyść wszystkie</button>`:'');
+}
+function renderOpSel(){$('#opsel').innerHTML=DICT.op.map(u=>`<button class="${S.ops.has(u)?'on':''}" data-op="${u}" title="${USERS[u]}">${opBadge(u)}</button>`).join('');
+ if(!S.ops.size)$('#opsel').querySelectorAll('button').forEach(b=>b.classList.add('on'));}
+function fillSelects(){
+ const opt=(ph,arr)=>`<option value="">${ph}</option>`+arr.map(v=>`<option>${v}</option>`).join('');
+ $('#fKlient').innerHTML=opt('Klient: wszyscy',DICT.klient);$('#fTyp1').innerHTML=opt('Typ 1: wszystkie',DICT.t1);
+ $('#fStatus').innerHTML=opt('Status: wszystkie',[...STATUSES,'Anulowane']);$('#fRozl').innerHTML=opt('Rozliczenie: wszystkie',ROZL);
+}
+function renderList(){renderTabs();renderGrid();renderToday();}
+
+/* ---------- Na dziś ---------- */
+const ALERTS=[
+ {id:'QAR100239',sev:'h',t:'Dziś ETD – sprawdź dokumenty przewozowe',m:'SMGS / HBL jeszcze nie dodane'},
+ {id:'QAR100240',sev:'h',t:'Podjęcie minęło 2 dni temu – brak dokumentów handlowych',m:'Gotowość 2026-11-03'},
+ {id:'QAR100233',sev:'m',t:'ETA za 2 dni – przygotuj awizację',m:'ETA kolej 2026-11-07, Poznań Franowo'},
+ {id:'QAR100228',sev:'m',t:'Rezerwa bez faktury od 21 dni',m:'Składowanie_k 360,00 EUR · Magazyn DTA'},
+ {id:'odprawa-celna-1105',sev:'m',t:'Zrealizowane, brak faktury sprzedażowej',m:'Odprawa celna_p 650,00 PLN'},
+ {id:'QAR100236',sev:'i',t:'Biuro Szanghaj dodało 4 pliki',m:'Zdjęcia z załadunku · 09:41'},
+];
+function renderToday(){
+ const list=ALERTS.filter(a=>{const o=byId(a.id);return o&&(S.todayScope==='all'||o.op===S.me)});
+ $('#todaySeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.s===S.todayScope));
+ $('#todayCnt').textContent=ALERTS.length;
+ $('#alerts').innerHTML=list.length?list.map(a=>{const o=byId(a.id);return `<div class="al"><span class="sev sev-${a.sev}"></span><div class="t">${esc(a.t)}</div><div class="m">${opBadge(o.op)}<span class="mono">${esc(o.nr)}</span>· ${esc(o.klient)}</div><div class="go"><span class="muted" style="font-size:11.5px">${esc(a.m)}</span><button data-go="${o.id}">Przejdź →</button></div></div>`}).join(''):'<p class="muted" style="font-size:12.5px">Brak alertów na dziś dla Twoich zleceń.</p>';
+}
+
+/* ---------- Drawer ---------- */
+function openDrawer(id){
+ S.sel=id;const o=byId(id);const x=calc(o);const money=S.role!=='bs';
+ const dateRow=(l,k)=>{const f=fill(o,{k});return `<div>${l}</div><div class="${f}" style="${f?`background:var(--${f})`:''}">${o[k]||'-'}</div>`};
+ $('#drawer').innerHTML=`<div class="dh"><div style="display:flex;align-items:center;gap:10px"><span class="mono" style="font-size:18px;font-weight:600">${esc(o.nr)}</span>${opBadge(o.op)}<span style="flex:1"></span><button class="iconbtn" data-close-drawer title="Zamknij" style="width:28px;height:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div style="font-weight:700">${esc(FULLNAME[o.klient])}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${stChip(o.status)}${money?rzChip(o.rozl):''}${[o.t1,o.t2,o.t3].filter(Boolean).map(t=>`<span class="tchip">${t}</span>`).join('')}</div></div>
+  <div class="db">
+   ${o.warn?`<div class="banner warn">⚠ ${esc(o.warn)}</div>`:''}
+   <div class="kv"><div>Nr kontenera / LCL</div><div class="mono">${esc(o.kont||'-')}</div><div>Warunki · Załadunek</div><div>${o.war?esc(o.war+' · '+o.zal):'-'}</div><div>Terminal dostawy</div><div>${esc(o.term||'-')}</div><div>Odbiorca / Miejsce dostawy</div><div>${esc(o.odb||'-')}</div>${dateRow('Gotowość / Podjęcie','got')}${dateRow('ETD','etd')}${dateRow('ETA kolej','eta')}${dateRow('Data podstawienia','pod')}<div>Nr przesyłki klienta</div><div class="mono">${esc(o.ref)}</div></div>
+   ${money?`<div class="kv"><div>Przychód</div><div class="rev b">${fmtP(x.r)}</div><div>Koszt</div><div class="cost">${fmtP(x.c)}</div><div>Zysk</div><div class="${x.p<0?'neg':'b'}">${x.p<0?'▼ ':''}${fmtP(x.p)} · ${x.m.toFixed(1).replace('.',',')}%</div></div>`:''}
+   <div><div class="muted" style="font-size:11.5px;font-weight:700;margin-bottom:4px">UWAGI</div>${esc(o.uwagi)}</div>
+  </div>
+  <div class="df"><button class="btn primary" data-open="${o.id}">Otwórz pełny widok</button>${money?`<button class="btn" data-mail="${o.id}">Wyślij do klienta</button>`:''}</div>`;
+ $('#drawer').hidden=false;renderGrid();
+}
+function closeDrawer(){$('#drawer').hidden=true;S.sel=null;renderGrid()}
+
+/* ---------- Details ---------- */
+const NEXT={Nowe:'Oznacz jako zaplanowane',Zaplanowane:'Oznacz jako podjęte',Podjęte:'Oznacz jako w drodze','W drodze':'Oznacz jako dojeżdża',Dojeżdża:'Potwierdź podstawienie'};
+function ensureDocs(o){
+ if(o.docs)return;const i=sIdx(o);const d=[];const up=(g,n,by,dt,ph)=>d.push({g,n,by,dt,ph});
+ up('Zlecenie klienta',`Zlecenie_${o.ref}.pdf`,o.op,o.got?shift(o.got,-12):'2026-11-02');
+ if(o.special){up('Inne','SAD_import_ZC429.pdf','PR',TODAY);up('Inne','Pelnomocnictwo_GTS.pdf','PR','2026-11-04')}
+ if(i>=2||o.docsEarly){const dt=o.got||TODAY;up('Dokumenty handlowe',`Commercial_Invoice_${o.ref.slice(3)}.pdf`,'Biuro Szanghaj',dt);up('Dokumenty handlowe','Packing_List.xlsx','Biuro Szanghaj',dt);
+   for(let k=1;k<=4;k++)up('Zdjęcia z załadunku',`IMG_${4820+k}.jpg`,'Biuro Szanghaj',o.id==='QAR100236'?TODAY:dt,true)}
+ if(i>=3&&!o.special&&o.etd){up('SMGS / HBL',`SMGS_${(o.lcl?o.kdrob:o.kont).split(' ')[0]}.pdf`,o.op,o.etd);up('SMGS / HBL',`HBL_Q4R${o.nr.slice(-5)}.pdf`,o.op,o.etd)}
+ if(o.tl)up('Tłumaczenie','Tlumaczenie_dokumentow_PL.docx',o.op,shift(o.etd,1));
+ if(o.invoiced)up('Faktury',`${o.fv.replace(/\//g,'_')}.pdf`,o.op,shift(o.etd||TODAY,1));
+ Object.values(o.k).forEach(a=>{if(a.inv)up('Faktury',`FK_${a.inv.replace(/\//g,'_')}.pdf`,'Księgowość',shift(o.etd||TODAY,4))});
+ o.docs=d;
+}
+function shift(dt,n){if(!dt)return TODAY;const x=new Date(dt);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function ensureHist(o){
+ if(o.hist)return;const h=[];const i=sIdx(o);
+ h.push([shift(o.got||TODAY,-14)+' 10:02',o.op,'Utworzono zlecenie (status: Nowe)']);
+ if(i>=1)h.push([shift(o.got,-9)+' 14:37',o.op,'Status: <del>Nowe</del> → Zaplanowane']);
+ if(i>=1)h.push([shift(o.got,-9)+' 14:38',o.op,'Wysłano e-mail „Plan realizacji” do klienta']);
+ if(i>=2)h.push([(o.got||TODAY)+' 09:12',o.op,'Status: <del>Zaplanowane</del> → Podjęte']);
+ if(o.id==='QAR100236')h.push(['2026-10-28 11:20','KS','ETD: <del>2026-11-04</del> → 2026-11-06'],[TODAY+' 09:41','BS','Biuro Szanghaj dodało 4 pliki (Zdjęcia z załadunku)']);
+ if(i>=3&&o.etd)h.push([o.etd+' 16:05',o.op,'Status: <del>Podjęte</del> → W drodze']);
+ if(o.invoiced)h.push([shift(o.etd||TODAY,1)+' 08:50',o.op,`Wystawiono fakturę sprzedażową ${o.fv}`]);
+ if(i>=4&&o.eta)h.push([shift(o.eta,-2)+' 08:00','—','System: status → Dojeżdża (ETA za 2 dni)']);
+ if(i>=5&&o.pod)h.push([o.pod+' 15:30',o.op,'Status: <del>Dojeżdża</del> → Zakończone']);
+ if(o.rozl==='Miesiąc zamknięty')h.push(['2026-11-03 17:10','MS','Zamknięto miesiąc 2026-10']);
+ o.hist=h.sort((a,b)=>a[0]<b[0]?-1:1);
+}
+const RCP={
+ 'Nordpol Meble':[['logistyka@nordpol.example'],['a.wrona@nordpol.example']],
+ 'Viltex Odzież':[['import@viltex.example'],['m.lis@viltex.example']],
+ 'Hydromix Armatura':[['zakupy@hydromix.example'],['p.kowal@hydromix.example'],['magazyn@hydromix.example']],
+ 'Elektra RTV AGD':[['logistyka@elektra.example'],['t.baran@elektra.example']],
+ 'GTS Logistics':[['Oddział Gliwice (3)',true],['Oddział Poznań (2)',true]],
+};
+function ensureComm(o){if(o.rcp)return;o.rcp=(RCP[o.klient]||[]).map(([a,g])=>({a,g}));
+ const i=sIdx(o);o.mails=[];
+ if(i>=1)o.mails.push({dt:shift(o.got,-9)+' 14:38',t:'Plan realizacji',to:o.rcp.map(r=>r.a).join(', '),att:'Plan_realizacji.pdf'});
+ if(i>=2&&!o.special)o.mails.push({dt:shift(o.got,1)+' 10:15',t:'Dokumenty po podjęciu',to:o.rcp.map(r=>r.a).join(', '),att:'Commercial_Invoice, Packing_List, 4 zdjęcia'});
+ if(i>=3&&o.etd)o.mails.push({dt:o.etd+' 16:10',t:'Wyjazd + monitoring',to:o.rcp.map(r=>r.a).join(', '),att:'SMGS, HBL + link do monitoringu'});
+ if(i>=4)o.mails.push({dt:shift(o.eta,-1)+' 09:30',t:'Awizacja',to:o.rcp.map(r=>r.a).join(', '),att:'Awizacja_kierowca.pdf'});
+}
+
+function renderDetail(id){
+ const o=byId(id);if(!o)return go('lista');
+ ensureDocs(o);ensureHist(o);ensureComm(o);
+ const x=calc(o);const money=S.role!=='bs';const locked=o.rozl==='Miesiąc zamknięty';const cancelled=o.status==='Anulowane';
+ if(!money&&['pk','comm'].includes(S.dtab))S.dtab='docs';
+ const i=sIdx(o);
+ const steps=STATUSES.map((s,k)=>`<div class="step ${cancelled?'':k<i?'done':k===i?'cur':''}"><span class="c">${k<i&&!cancelled?'✓':''}</span><span class="lbl">${s}</span>${k<STATUSES.length-1?'<span class="bar"></span>':''}</div>`).join('');
+ // primary action
+ let prim='';
+ if(!cancelled&&money){
+  if(o.status==='Zakończone'){
+    if(locked)prim='';
+    else{const miss=o.rozl==='Rozliczone'?[]:o.missing;prim=pBtn('Przekaż do księgowości',miss,'acct')}
+  } else prim=pBtn(NEXT[o.status],o.missing,'next');
+ }
+ const flags=[o.soc?`<span class="flag" style="background:var(--f-yellow)">Kontener własny (SOC)</span>`:'',o.tl?`<span class="flag" style="background:var(--f-purple)">Wysłane tłumaczenie</span>`:'',o.sklad?`<span class="flag" style="background:var(--f-red)">Składowanie</span>`:'',x.p<0&&money?`<span class="flag" style="color:var(--danger);background:#FBE7E4">▼ Wynik ujemny</span>`:'',o.warn?`<span class="flag" style="background:var(--warn-soft);color:#6B4800" title="${esc(o.warn)}">⚠ 1 ostrzeżenie</span>`:''].join('');
+ const tip=Object.entries(x.byC).map(([c,v])=>`<tr><td>${c}</td><td>${fmtN(v.r)}</td><td>${fmtN(v.c)}</td><td>${fmtN(v.r-v.c)}</td></tr>`).join('');
+ const tabs=[['op','Operacja'],money&&['pk','Przychody i koszty'],['docs','Dokumenty',o.docs.length],money&&['comm','Komunikacja',o.mails.length],['awiz','Awizacja'],['hist','Historia',o.hist.length]].filter(Boolean);
+ $('#detail').innerHTML=`<div class="dhead">
+  <div class="crumb"><button data-go-list>← Lista zleceń</button><span>/</span><span>${esc(o.nr)}</span></div>
+  <div class="drow"><div class="dtitle">
+    <div class="l1"><h1>${esc(o.nr)}</h1><span class="client">${esc(FULLNAME[o.klient])}</span>${opBadge(o.op,1)}</div>
+    <div class="l2">${[o.t1,o.t2,o.t3].map((t,k)=>`<span class="tchip" title="Typ ${k+1}">${t||'-'}</span>`).join('')}<span style="width:6px"></span>${stChip(o.status)}${money?rzChip(o.rozl):''}${flags}</div>
+  </div>
+  ${money?`<div class="sum"><div><div class="k">Przychód</div><div class="v rev">${fmtP(x.r)}</div></div><div><div class="k">Koszt</div><div class="v" style="color:var(--cost)">${fmtP(x.c)}</div></div><div><div class="k">Zysk</div><div class="v ${x.p<0?'neg':''}">${x.p<0?'▼ ':''}${fmtP(x.p)}</div></div><div><div class="k">Marża</div><div class="v">${x.m.toFixed(1).replace('.',',')}%</div></div>
+   <div class="tip"><b>Podział walut</b> (kurs NBP z 2026-10-16)<table><tr style="color:#9EA3A9"><td></td><td>Przychód</td><td>Koszt</td><td>Wynik</td></tr>${tip}</table></div></div>`:''}
+  </div>
+  <div class="steprow"><div class="stepper">${steps}</div>
+   <div class="acts">${prim}
+    ${money&&!cancelled?`<button class="btn" data-mail="${o.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>Wyślij do klienta</button>`:''}
+    ${money?`<button class="btn ghost" data-dup="${o.id}">Duplikuj</button>`:''}
+    ${money&&!cancelled&&!locked?`<button class="btn ghost danger" data-cancel-ask>Anuluj</button><div class="confirm" id="cancelConfirm" hidden><b>Anulować zlecenie ${esc(o.nr)}?</b><span class="muted">Zlecenie zostanie oznaczone jako Anulowane i przekreślone na liście. Dane i dokumenty pozostaną.</span><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn sm" data-cancel-no>Nie</button><button class="btn sm primary" data-cancel-yes="${o.id}">Tak, anuluj</button></div></div>`:''}
+   </div></div>
+  <div class="dtabs">${tabs.map(([k,l,n])=>`<button class="${S.dtab===k?'on':''}" data-dtab="${k}">${l}${n!==undefined?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>
+ </div>
+ <div class="dbody">
+  ${cancelled?`<div class="banner cancel">Zlecenie anulowane. Pola są tylko do odczytu.</div>`:''}
+  ${locked?`<div class="banner lock">🔒 Miesiąc 2026-10 zamknięty – zlecenie tylko do odczytu. Zmiany wymagają zgody zarządu.</div>`:''}
+  ${S.role==='bs'?`<div class="banner info">Biuro Szanghaj: dodaj zdjęcia z załadunku i dokumenty handlowe w zakładce Dokumenty. Kwoty są ukryte.</div>`:''}
+  ${tabBody(o,x,locked||cancelled||S.role==='bs')}
+ </div>`;
+}
+function pBtn(label,miss,act){
+ if(miss&&miss.length)return `<div class="pwrap"><button class="btn primary" aria-disabled="true">${label}</button><div class="reqtip"><b>Brakuje:</b> ${miss.join(', ')}<ul>${miss.map(m=>`<li>${m}</li>`).join('')}</ul></div></div>`;
+ return `<button class="btn primary" data-advance="${act}">${label}</button>`;
+}
+function fld(o,k,label,opts={}){
+ const v=opts.val!==undefined?opts.val:o[k];const empty=!v&&v!==0;const f=opts.fill||'';const ro=opts.ro?' disabled':'';
+ const id=`f-${k}`;
+ let input;
+ if(opts.sel){input=`<select id="${id}" data-k="${k}"${ro}>${['',...opts.sel].map(s=>`<option ${s===v?'selected':''} value="${s}">${s||'-'}</option>`).join('')}</select>`}
+ else input=`<input id="${id}" data-k="${k}" type="${opts.date?'date':'text'}" value="${esc(v??'')}"${opts.mono?' class="mono"':''}${ro} placeholder="-">`;
+ return `<div class="fld ${empty?'empty':''} ${f} ${opts.cls||''}"><label for="${id}">${label}</label><div class="in">${input}${opts.ro?'':`<button class="tg" type="button" data-dashtg title="Celowo puste (–)">–</button>`}</div>${opts.hint?`<span class="hint">${opts.hint}</span>`:''}</div>`;
+}
+function tabBody(o,x,ro){
+ switch(S.dtab){
+ case 'op':{
+  const d=k=>fill(o,{k});
+  const linked=o.linked?byId(o.linked):null;
+  let lk='<p class="muted" style="margin:0;font-size:12.5px">Brak powiązanych zleceń. <button class="link">+ Powiąż zlecenie</button></p>';
+  if(linked&&S.role!=='bs'){const y=calc(linked);const sum=x.p+y.p;
+   lk=`<div class="linked"><div class="lk"><span class="mono">${esc(o.nr)}</span><span>${o.t1} · ${o.r.prz?'sprzedaż kontenera':'transport kontenera'} · ten rekord</span><span class="${x.p<0?'neg':'b'}">${x.p<0?'▼ ':''}${fmtP(x.p)}</span></div>
+   <div class="lk"><button data-open="${linked.id}">${esc(linked.nr)}</button><span>${linked.klient} · ${linked.r.prz?'sprzedaż kontenera':'transport kontenera'}</span><span class="${y.p<0?'neg':'b'}">${y.p<0?'▼ ':''}${fmtP(y.p)}</span></div>
+   <div class="lk total"><span>Razem</span><span>Wynik łączny powiązanych zleceń</span><span class="${sum<0?'neg':''}" style="color:${sum>=0?'var(--ok)':''}">${fmtP(sum)}</span></div></div>`}
+  return `${o.warn?`<div class="banner warn">⚠ ${esc(o.warn)} <button class="link" data-dtab="pk" style="margin-left:auto">Uzupełnij koszt →</button></div>`:''}
+  <div class="cols-op">
+   <div class="card"><h3>Dane zlecenia<span class="sp"></span><span class="muted" style="font-weight:500;font-size:11.5px">„–” = celowo puste</span></h3><div class="cb"><div class="form">
+    ${fld(o,'fv','Nr faktury',{ro,mono:1})}${fld(o,'nr','Nr przesyłki',{ro,mono:1,hint:o.special?'Nr specjalny ze słownika':''})}${fld(o,'ref','Nr przesyłki klienta',{ro,mono:1})}
+    ${fld(o,'op','OP (opiekun)',{ro,sel:DICT.op})}${fld(o,'klient','Klient',{ro,sel:DICT.klient})}${fld(o,'serwis','Serwis',{ro,sel:DICT.serwis})}
+    ${fld(o,'agent','Agent',{ro,sel:DICT.agent})}${fld(o,'t1','Typ 1',{ro,sel:DICT.t1})}<div class="pair">${fld(o,'t2','Typ 2',{ro,sel:DICT.t2})}${fld(o,'t3','Typ 3',{ro,sel:DICT.t3})}</div>
+    <div class="pair">${fld(o,'war','Warunki',{ro,sel:DICT.war})}${fld(o,'zal','Załadunek',{ro})}</div>${fld(o,'term','Terminal dostawy',{ro,sel:DICT.term})}${fld(o,'odb','Odbiorca / Miejsce dostawy',{ro})}
+    ${fld(o,'got','Gotowość / Podjęcie',{ro,date:1,fill:d('got')})}${fld(o,'etd','ETD',{ro,date:1,fill:d('etd')})}<div class="pair">${fld(o,'eta','ETA kolej',{ro,date:1,fill:d('eta')})}${fld(o,'pod','Data podstawienia',{ro,date:1,fill:d('pod')})}</div>
+    ${fld(o,'uwagi','Uwagi',{ro,cls:'span3'})}
+   </div></div></div>
+   <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card"><h3>Dane towaru</h3><div class="cb"><div class="form" style="grid-template-columns:1fr 1fr">
+     ${fld(o,'kont_nr',o.lcl?'Nr kontenera':'Nr kontenera',{ro,mono:1,val:o.lcl?'':o.kont,fill:o.soc?'f-yellow':'',cls:o.lcl?'':''})}
+     ${fld(o,'kdrob','Kontener drobnica',{ro,mono:1,hint:o.kdrob?'<button class="link">Otwórz konsolę →</button>':''})}
+     ${fld(o,'ctn','Liczba opakowań (ctns)',{ro,val:o.cargo.ctn,fill:o.tl?'f-purple':''})}${fld(o,'kg','Waga (kg)',{ro,val:o.cargo.kg?fmtN(o.cargo.kg).replace(',00',''):'',fill:o.tl?'f-purple':''})}
+     ${fld(o,'cbm','Objętość (CBM)',{ro,val:o.cargo.cbm?String(o.cargo.cbm).replace('.',','):'',fill:o.tl?'f-purple':''})}
+    </div><div class="checks">
+     <label><input type="checkbox" id="c-ver" ${o.verified?'checked':''} ${ro?'disabled':''}> Zweryfikowane z dokumentami</label>
+     <label><input type="checkbox" id="c-tl" data-flag="tl" ${o.tl?'checked':''} ${ro?'disabled':''}> Wysłane tłumaczenie</label>
+     <label><input type="checkbox" id="c-soc" data-flag="soc" ${o.soc?'checked':''} ${ro?'disabled':''}> Kontener własny (SOC)</label>
+    </div></div></div>
+    <div class="card"><h3>Powiązane zlecenia</h3><div class="cb">${lk}</div></div>
+   </div>
+  </div>`;}
+ case 'pk':{
+  const rr=REVK.filter(k=>o.r[k]).map(k=>{const a=o.r[k];return `<tr><td>${SVC[k]}</td><td class="num rev">${fmtN(a.v)}</td><td>${a.c}</td><td class="muted">${k==='skl'?'Postój na magazynie 3 dni':'-'}</td><td>${o.invoiced?`<button class="link mono">${esc(o.fv)}</button>`:'<span class="chip rz-Dozafakturowania">Do zafakturowania</span>'}</td></tr>`}).join('');
+  const ST={rez:'Rezerwa',zar:'Zarejestrowany',ksi:'Przekazany do księgowości'};
+  const cr=COSTK.filter(k=>o.k[k]).map(k=>{const a=o.k[k];return `<tr><td>${SVC[k]}</td><td>${esc(a.d||'-')}</td><td class="num"><span class="cost${a.s==='rez'?' rez':''}">${fmtN(a.v)}</span></td><td>${a.c}</td><td><select data-cst="${k}" aria-label="Status kosztu" ${ro?'disabled':''}>${Object.entries(ST).map(([s,l])=>`<option value="${s}" ${a.s===s?'selected':''}>${l}</option>`).join('')}</select>${a.s==='rez'&&a.since?`<div style="font-size:11px;color:var(--warn);margin-top:2px">bez faktury od ${daysBetween(a.since,TODAY)} dni</div>`:''}</td><td>${a.inv?`<button class="link mono">${esc(a.inv)}</button>`:'<button class="link">Przypisz fakturę</button>'}</td><td class="muted">-</td></tr>`}).join('');
+  const missRow=o.warn?`<tr style="background:var(--warn-soft)"><td>Dostawa drogowa + Postój</td><td><select aria-label="Dostawca"><option>— wybierz dostawcę —</option><option>TL Log Transport</option></select></td><td class="num"><input aria-label="Kwota" style="width:90px;text-align:right" placeholder="0,00"></td><td>PLN</td><td><span class="warn-ic">⚠</span> brak</td><td>-</td><td class="muted">wymagane dla TRFCL</td></tr>`:'';
+  const sumR=REVK.filter(k=>o.r[k]).reduce((s,k)=>s+o.r[k].v*RATES[o.r[k].c],0);const sumC=x.c;
+  return `${o.warn?`<div class="banner warn">⚠ ${esc(o.warn)}</div>`:''}
+   <div class="fx"><span>Kurs NBP z 2026-10-16: <b>USD 3,9821</b> · <b>EUR 4,2610</b></span><span>Kwoty zarejestrowane = <b class="cost">pogrubione</b>, rezerwa = <span class="cost rez">kursywa</span></span><span style="flex:1"></span><button class="btn sm">Eksport do księgowości</button></div>
+   <div class="card"><h3><span style="color:var(--rev)">Przychody</span><span class="sp"></span><span class="muted" style="font-weight:600">${fmtP(sumR)}</span></h3>
+    <div style="overflow-x:auto"><table class="t"><thead><tr><th>Usługa</th><th class="num">Kwota</th><th>Waluta</th><th>Uwagi</th><th>Faktura sprzedażowa</th></tr></thead><tbody id="tbR">${rr||`<tr><td colspan="5" class="muted">Brak pozycji przychodowych.</td></tr>`}${ro?'':`<tr class="add" data-addrow="R"><td colspan="5">+ Dodaj pozycję</td></tr>`}</tbody></table></div></div>
+   <div class="card"><h3><span style="color:var(--cost)">Koszty</span><span class="sp"></span><span class="muted" style="font-weight:600">${fmtP(sumC)}</span></h3>
+    <div style="overflow-x:auto"><table class="t"><thead><tr><th>Usługa</th><th>Dostawca</th><th class="num">Kwota</th><th>Waluta</th><th>Status</th><th>Faktura kosztowa</th><th>Uwagi</th></tr></thead><tbody id="tbC">${cr}${missRow}${!cr&&!missRow?`<tr><td colspan="7" class="muted">Brak pozycji kosztowych.</td></tr>`:''}${ro?'':`<tr class="add" data-addrow="C"><td colspan="7">+ Dodaj pozycję</td></tr>`}</tbody></table></div></div>`;}
+ case 'docs':{
+  const G=['Zlecenie klienta','Dokumenty handlowe','Zdjęcia z załadunku','SMGS / HBL','Tłumaczenie','Faktury','Inne'];
+  const EXT={pdf:'#C94A3A',xlsx:'#2E7D4A',docx:'#2F6FD6',eml:'#7A4FD0',msg:'#7A4FD0',jpg:'#5B6470'};
+  const fileH=f=>{const e=f.n.split('.').pop().toLowerCase();return `<div class="file"><span class="ext" style="background:${EXT[e]||'#5B6470'}">${e.toUpperCase()}</span><div><div class="nm" title="${esc(f.n)}">${esc(f.n)}</div><div class="mt">${esc(f.by==='BS'?'Biuro Szanghaj':USERS[f.by]?f.by:f.by)} · ${f.dt}</div></div></div>`};
+  const photo=(f,k)=>`<div class="ph" style="background:${['linear-gradient(160deg,#6E7F8F,#2F3A44)','linear-gradient(160deg,#B65F3A,#5B2C1A)','linear-gradient(160deg,#4F7A5A,#203828)','linear-gradient(160deg,#8C8F94,#3B3E43)'][k%4]}"><svg viewBox="0 0 100 75" style="position:absolute;inset:0;width:100%;height:100%" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.2">${Array.from({length:9},(_,j)=>`<path d="M${14+j*8} 22v34"/>`).join('')}<rect x="10" y="20" width="80" height="38" rx="1"/></g></svg><span>${esc(f.n)} · ${f.dt}</span></div>`;
+  const groups=G.map(g=>{const fs=o.docs.filter(f=>f.g===g);if(!fs.length)return '';
+    const body=g==='Zdjęcia z załadunku'?`<div class="photos">${fs.map(photo).join('')}</div><div class="mt muted" style="font-size:11px">${fs.length} zdjęcia · dodane przez ${esc(fs[0].by)}</div>`:fs.map(fileH).join('');
+    return `<div class="dg"><h4>${g}<span style="color:var(--faint)">${fs.length}</span></h4>${body}</div>`}).join('');
+  return `<div class="drop" id="drop"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/></svg><b>Przeciągnij pliki lub maile (.eml, .msg)</b><span>albo <label class="link" for="fileIn" style="cursor:pointer">wybierz z dysku</label>. System podpowie typ dokumentu na podstawie nazwy pliku.</span><input type="file" id="fileIn" multiple hidden></div>
+   <div class="dgrp">${groups}</div>`;}
+ case 'comm':{
+  return `<div class="cols2"><div class="card"><h3>Odbiorcy e-maili tego zlecenia</h3><div class="cb" style="display:flex;flex-direction:column;gap:8px">
+    <span class="muted" style="font-size:12px">Uzupełnione z grupy mailowej klienta ${esc(o.klient)}. Zmiana dotyczy tylko tego zlecenia.</span>
+    <div class="rcp" id="rcp">${o.rcp.map((r,k)=>`<span class="r ${r.g?'grp':''}">${esc(r.a)}<button data-rcpx="${k}" aria-label="Usuń">×</button></span>`).join('')}<input id="rcpIn" placeholder="Dodaj adres i naciśnij Enter"></div>
+    <div class="mrow" style="margin:0"><label>DW (CC)</label><div class="rcp"><span class="r">${o.op.toLowerCase()}@q4rail.example</span></div></div>
+   </div></div>
+   <div class="card"><h3>Wysłane e-maile<span class="sp"></span><button class="btn sm primary" data-mail="${o.id}">Wyślij do klienta</button></h3><div class="cb" style="padding:0">
+    <table class="t"><thead><tr><th>Data</th><th>Szablon</th><th>Odbiorcy</th><th>Załączniki</th></tr></thead><tbody>${o.mails.length?o.mails.slice().reverse().map(m=>`<tr><td class="mono" style="white-space:nowrap">${m.dt}</td><td><b>${m.t}</b></td><td class="muted">${esc(m.to)}</td><td class="muted">${esc(m.att)}</td></tr>`).join(''):`<tr><td colspan="4" class="muted">Jeszcze nic nie wysłano.</td></tr>`}</tbody></table></div></div></div>`;}
+ case 'awiz':{
+  const a=o.awiz||{};const f=(k,l)=>`<div class="fld ${a[k]?'':'empty'}"><label for="aw-${k}">${l}</label><div class="in"><input id="aw-${k}" value="${esc(a[k]||'')}" placeholder="-"></div></div>`;
+  return `<div class="cols2"><div class="card"><h3>Wklej dane kierowcy z maila</h3><div class="cb" style="display:flex;flex-direction:column;gap:10px">
+   <textarea id="awTxt" rows="9" ${ro?'disabled':''}>Dzień dobry,
+podaję dane do awizacji na ${shift(o.eta||TODAY,1)} godz. 08:00:
+kierowca: Tomasz Wilk, tel. +48 601 234 517
+ciągnik: WGM 4K21, naczepa: WGM 87PP
+miejsce: terminal ${o.term||'Sławków'}, brama 2
+Pozdrawiam, TL Log Transport</textarea>
+   <div style="display:flex;gap:8px;align-items:center"><button class="btn primary" id="awGo" ${ro?'disabled':''}>Rozpoznaj</button><span id="awNote" class="ok-note">${a.imie?'Rozpoznano 7 z 7 pól – sprawdź i zapisz.':''}</span></div></div></div>
+   <div class="card"><h3>Dane awizacji</h3><div class="cb"><div class="form" style="grid-template-columns:1fr 1fr">${f('imie','Imię')}${f('nazw','Nazwisko')}${f('tel','Telefon')}${f('ciag','Nr rejestracyjny ciągnika')}${f('nacz','Nr rejestracyjny naczepy')}${f('dt','Data i godzina')}<div class="span3" style="grid-column:1/-1">${f('msc','Miejsce')}</div></div>
+   <div style="margin-top:10px;display:flex;gap:8px"><button class="btn" ${a.imie?'':'disabled'}>Zapisz</button>${S.role!=='bs'?`<button class="btn" data-mail="${o.id}" data-tpl="Awizacja">Wyślij awizację do klienta</button>`:''}</div></div></div></div>`;}
+ case 'hist':
+  return `<div class="card"><h3>Historia zmian</h3><div class="cb"><div class="hist">${o.hist.slice().reverse().map(h=>`<div class="h"><span class="ts">${h[0]}</span>${h[1]==='—'?'<span class="muted">sys</span>':opBadge(h[1])}<span>${h[2]}</span></div>`).join('')}</div></div></div>`;
+ }
+}
+
+/* ---------- actions ---------- */
+function advance(o){
+ const i=sIdx(o);const from=o.status;
+ if(i<0||i>=5)return;
+ const to=STATUSES[i+1];o.status=to;
+ if(to==='Podjęte'&&!o.got)o.got=TODAY;
+ if(to==='Zakończone'&&!o.pod)o.pod=TODAY;
+ o.missing=to==='Zakończone'&&!o.invoiced?['faktura sprzedażowa']:[];
+ ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`Status: <del>${from}</del> → ${to}`]);
+ if(o.docs&&to==='W drodze'&&!o.docs.some(d=>d.g==='SMGS / HBL'))o.docs.push({g:'SMGS / HBL',n:`SMGS_${(o.kont||'X').split(' ')[0]}.pdf`,by:S.me,dt:TODAY});
+ toast(`${o.nr}: status zmieniony na „${to}”`);
+}
+function nowT(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function updRozl(o){if(o.rozl==='Miesiąc zamknięty')return;if(o.invoiced)o.rozl=hasRez(o)?'Koszty niekompletne':(o.status==='Zakończone'?'Rozliczone':'Zafakturowane');
+ if(o.rozl==='Rozliczone'||!hasRez(o))o.missing=(o.missing||[]).filter(m=>!m.startsWith('faktura kosztowa'))}
+let seq=100242;
+function newOrder(from){
+ const id='QAR'+(seq++);const base=from?JSON.parse(JSON.stringify(from)):{klient:'Nordpol Meble',serwis:'',agent:'',t1:'FCL',t2:'',t3:'',war:'',zal:'',term:'',odb:'',r:{},k:{},cargo:{ctn:'',kg:'',cbm:''}};
+ const o=Object.assign(base,{id,nr:id,fv:'',op:S.me,status:'Nowe',rozl:'Do zafakturowania',invoiced:false,got:'',etd:'',eta:'',pod:'',kont:from?.lcl?from.kont:'',ref:from?from.ref:'PO-',uwagi:from?`Kopia ${from.nr}`:'Nowe zlecenie',missing:['data gotowości / podjęcia','planowana ETD'],docs:null,hist:null,rcp:null,mails:null,linked:null,warn:null,special:false});
+ for(const k in o.k)o.k[k].s='rez',delete o.k[k].inv;
+ ORDERS.unshift(o);return o;
+}
+
+/* ---------- email modal ---------- */
+const TPL={'Plan realizacji':'Zaplanowane','Dokumenty po podjęciu':'Podjęte','Wyjazd + monitoring':'W drodze','Awizacja':'Dojeżdża'};
+const TPL_BY_STATUS={Nowe:'Plan realizacji',Zaplanowane:'Dokumenty po podjęciu',Podjęte:'Wyjazd + monitoring','W drodze':'Awizacja',Dojeżdża:'Awizacja',Zakończone:'Awizacja'};
+let M=null;
+function openMail(id,tpl){
+ const o=byId(id);ensureDocs(o);ensureComm(o);
+ M={id,tpl:tpl||TPL_BY_STATUS[o.status],to:o.rcp.map(r=>r.a),att:new Set()};
+ renderMail();$('#ovl').hidden=false;
+}
+function mailBody(o,t){
+ const m=v=>`<mark>${esc(v||'-')}</mark>`;
+ const cn=o.kont||'-';
+ const hdr=`Dzień dobry,\n\n`;
+ const ft=`\n\nW razie pytań pozostaję do dyspozycji.\n\nPozdrawiam\n${o.op} · Q4Rail · dział spedycji kolejowej`;
+ switch(t){
+ case 'Plan realizacji': return hdr+`przesyłamy plan realizacji przesyłki ${m(o.nr)} (Ref. klienta ${m(o.ref)}).\n\nTowar: ${m(cn)}\nWarunki: ${m(o.war)} ${m(o.zal)}\nGotowość / podjęcie: ${m(o.got)}\nPlanowany wyjazd (ETD): ${m(o.etd)}\nTerminal docelowy: ${m(o.term)}\nMiejsce dostawy: ${m(o.odb)}`+ft;
+ case 'Dokumenty po podjęciu': return hdr+`informujemy, że towar dla przesyłki ${m(o.nr)} został podjęty ${m(o.got)}.\nW załączeniu dokumenty handlowe oraz zdjęcia z załadunku.\n\nKontener / LCL: ${m(cn)}\nPlanowany wyjazd (ETD): ${m(o.etd)}`+ft;
+ case 'Wyjazd + monitoring': return hdr+`przesyłka ${m(o.nr)} wyjechała ${m(o.etd)}.\nW załączeniu SMGS i HBL.\n\nKontener: ${m(cn)}\nPrzewidywany przyjazd na terminal (ETA): ${m(o.eta)}\nMonitoring na żywo: ${m('https://track.example.com/'+cn.split(' ')[0])}`+ft;
+ case 'Awizacja': return hdr+`przesyłamy awizację dostawy dla przesyłki ${m(o.nr)}.\n\nKontener: ${m(cn)}\nData podstawienia: ${m(o.pod||shift(o.eta,1))}\nMiejsce: ${m(o.odb)}\nKierowca i pojazd: w załączniku.`+ft;
+ }
+}
+function renderMail(){
+ const o=byId(M.id);const t=M.tpl;const next=TPL[t];const canMove=sIdx(o)<STATUSES.indexOf(next);
+ const subj=`${t} – ${o.nr} / ${(o.kont||'-').split(',')[0]} / Ref. klienta ${o.ref}`;
+ const suggested={'Plan realizacji':['Zlecenie klienta'],'Dokumenty po podjęciu':['Dokumenty handlowe','Zdjęcia z załadunku'],'Wyjazd + monitoring':['SMGS / HBL'],'Awizacja':[]}[t];
+ if(!M.attInit||M.attInit!==t){M.att=new Set(o.docs.map((d,k)=>suggested.includes(d.g)?k:-1).filter(k=>k>=0));M.attInit=t}
+ $('#modal').innerHTML=`<div class="mh"><h2>Wyślij do klienta</h2><span class="mono muted">${esc(o.nr)}</span><span style="flex:1"></span><button class="iconbtn" data-close-modal title="Zamknij"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+ <div class="mb"><div>
+  <div class="tpls">${Object.keys(TPL).map(k=>`<button class="${k===t?'on':''}" data-tpl-pick="${k}">${k}</button>`).join('')}</div>
+  <div class="mrow"><label>Do</label><div class="rcp">${M.to.map(a=>`<span class="r">${esc(a)}</span>`).join('')}</div></div>
+  <div class="mrow"><label>DW</label><div class="rcp"><span class="r">${o.op.toLowerCase()}@q4rail.example</span></div></div>
+  <div class="mrow"><label for="mSubj">Temat</label><input id="mSubj" value="${esc(subj)}"></div>
+  <div class="body-prev">${mailBody(o,t)}</div>
+ </div>
+ <div><div class="mh" style="padding:0 0 6px;border:0"><b style="font-size:12px">Załączniki z dokumentów zlecenia</b></div>
+  <div class="att">${o.docs.map((d,k)=>`<label><input type="checkbox" data-att="${k}" ${M.att.has(k)?'checked':''}> <span><b>${esc(d.n)}</b><br><span class="muted" style="font-size:11px">${d.g}</span></span></label>`).join('')}</div></div>
+ </div>
+ <div class="mf"><label style="display:flex;gap:7px;align-items:center;font-size:12.5px;${canMove?'':'color:var(--faint)'}"><input type="checkbox" id="mMove" ${canMove?'checked':'disabled'}> Po wysłaniu zmień status na: ${stChip(next)}</label><span style="flex:1"></span><span class="muted" style="font-size:12px">${M.att.size} zał.</span><button class="btn" data-close-modal>Anuluj</button><button class="btn primary" id="mSend">Wyślij</button></div>`;
+}
+function sendMail(){
+ const o=byId(M.id);const t=M.tpl;const next=TPL[t];
+ o.mails.push({dt:TODAY+' '+nowT(),t,to:M.to.join(', '),att:[...M.att].map(k=>o.docs[k].n).join(', ')||'-'});
+ ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`Wysłano e-mail „${t}” do klienta`]);
+ let msg=`Wysłano „${t}” do ${M.to.length} odbiorców`;
+ if($('#mMove')?.checked){const from=o.status;o.status=next;o.missing=[];o.hist.push([TODAY+' '+nowT(),S.me,`Status: <del>${from}</del> → ${next}`]);if(next==='Podjęte'&&!o.got)o.got=TODAY;msg+=` · status: ${next}`}
+ $('#ovl').hidden=true;M=null;toast(msg);rerender();
+}
+
+/* ---------- popovers ---------- */
+function showPop(html,x,y,cls=''){const p=$('#pop');p.className='pop '+cls;p.innerHTML=html;p.hidden=false;
+ const r=p.getBoundingClientRect();p.style.left=Math.max(8,Math.min(x,innerWidth-r.width-8))+'px';p.style.top=Math.max(8,Math.min(y,innerHeight-r.height-8))+'px'}
+function hidePop(){$('#pop').hidden=true}
+function legendHtml(){
+ const sw=v=>`<span class="sw" style="background:var(--${v})"></span>`;
+ return `<h3>Status operacyjny</h3><table>
+ <tr><td>${stChip('Nowe')}</td><td>Zlecenie zarejestrowane, daty niepotwierdzone. Bez wypełnień.</td></tr>
+ <tr><td>${stChip('Zaplanowane')}</td><td>${sw('f-blue')}Gotowość / Podjęcie i ETD – wysłany plan realizacji</td></tr>
+ <tr><td>${stChip('Podjęte')}</td><td>${sw('f-lgreen')}Gotowość / Podjęcie – towar podjęty, zdjęcia i dokumenty handlowe wysłane</td></tr>
+ <tr><td>${stChip('W drodze')}</td><td>${sw('f-lgreen')}ETD – wyjechała, SMGS / HBL wysłane; <b>pogrubiony</b> nr kontenera</td></tr>
+ <tr><td>${stChip('Dojeżdża')}</td><td>${sw('f-yellow')}Data podstawienia – działanie dziś lub jutro</td></tr>
+ <tr><td>${stChip('Zakończone')}</td><td>${sw('f-green')}Data podstawienia – dostarczone do odbiorcy</td></tr>
+ <tr><td>${stChip('Anulowane')}</td><td>Wiersz szary i przekreślony</td></tr></table>
+ <h3>Rozliczenie</h3><table>
+ <tr><td>${rzChip('Do zafakturowania')}</td><td>Są przychody, brak faktury sprzedażowej</td></tr>
+ <tr><td>${rzChip('Zafakturowane')}</td><td>${sw('f-green')}ETD intensywnie zielone – wystawiona faktura sprzedażowa</td></tr>
+ <tr><td>${rzChip('Koszty niekompletne')}</td><td>Co najmniej jeden koszt to rezerwa</td></tr>
+ <tr><td>${rzChip('Rozliczone')}</td><td>Zafakturowane, wszystkie koszty zarejestrowane</td></tr>
+ <tr><td>${rzChip('Miesiąc zamknięty')}</td><td>Zlecenie tylko do odczytu</td></tr></table>
+ <h3>Flagi i kwoty</h3><table>
+ <tr><td>${sw('f-purple')}</td><td>Wysłane tłumaczenie (dane towaru)</td></tr>
+ <tr><td>${sw('f-yellow')}</td><td>Kontener własny (SOC) – Nr kontenera / LCL</td></tr>
+ <tr><td>${sw('f-red')}</td><td>Składowanie_p – składowanie do refaktury</td></tr>
+ <tr><td><span class="neg">▼ −1 278,30</span></td><td>Wynik ujemny</td></tr>
+ <tr><td><span class="warn-ic">⚠</span></td><td>Ostrzeżenie walidacji (szczegóły w podpowiedzi)</td></tr>
+ <tr><td><span class="rev">1 280,00 USD</span></td><td>Przychód (_p)</td></tr>
+ <tr><td><span class="cost">950,00 EUR</span></td><td>Koszt z zarejestrowaną fakturą kosztową</td></tr>
+ <tr><td><span class="cost rez">950,00 EUR</span></td><td>Rezerwa – koszt oczekiwany, bez faktury</td></tr></table>`;
+}
+function colPickHtml(){
+ let h='<div class="mh">Pokaż / ukryj / kolejność</div>';let g='';
+ COLS.forEach((c,k)=>{if(c.g!==g){g=c.g;h+=`<div class="mh" style="color:var(--text)">${g}</div>`}
+  h+=`<label><input type="checkbox" data-colon="${k}" ${c.on?'checked':''} ${c.pin!==undefined?'disabled':''}><span>${esc(c.l)}</span>${c.pin===undefined?`<button class="mv" data-mv="${k}:-1" title="W górę">↑</button><button class="mv" data-mv="${k}:1" title="W dół">↓</button>`:'<span class="muted" style="font-size:11px">przypięta</span>'}</label>`});
+ return h;
+}
+
+/* ---------- routing ---------- */
+function go(h){if(location.hash!=='#'+h)location.hash=h;else route()}
+function route(){
+ const h=location.hash.slice(1)||'lista';
+ if(h.startsWith('zlecenie-')){const id=h.slice(9);if(!byId(id))return go('lista');
+   $('#vList').hidden=true;$('#vDetail').hidden=false;if(S.curDetail!==id){S.dtab=S.role==='bs'?'docs':'op';S.curDetail=id;$('#detail').scrollTop=0}renderDetail(id);setNav('zlecenia')}
+ else{$('#vDetail').hidden=true;$('#vList').hidden=false;S.curDetail=null;renderList();setNav('zlecenia')}
+}
+function rerender(){route();if(!$('#drawer').hidden&&S.sel)openDrawer(S.sel)}
+
+/* ---------- nav ---------- */
+const NAV=[['zlecenia','Zlecenia','M4 6h16M4 12h16M4 18h16'],['nadzis','Na dziś','M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18'],['klienci','Klienci','M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1a3 3 0 0 0-2-2.8M4 19v-1a3 3 0 0 1 2-2.8'],['sep'],['konsole','Konsole','M3 8h18v10H3zM7 8v10M11 8v10M15 8v10M19 8v10'],['kontenery','Kontenery','M3 8l9-4 9 4v8l-9 4-9-4zM3 8l9 4 9-4M12 12v8'],['sep'],['fs','Faktury sprzedażowe','M6 3h9l4 4v14H6zM9 12h7M9 16h5'],['fk','Faktury kosztowe','M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h3'],['kpd','Koszty poza spedycją','M4 20h16M7 17V9M12 17V5M17 17v-4'],['raporty','Raporty','M4 4v16h16M8 14l3-3 3 2 5-6'],['sep'],['slowniki','Słowniki','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11'],['ustawienia','Ustawienia','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2']];
+function renderNav(){$('#nav').innerHTML=NAV.map(n=>n[0]==='sep'?'<div class="sep"></div>':`<button data-nav="${n[0]}" title="${n[1]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${n[2]}"/></svg><span class="lbl">${n[1]}</span>${n[0]==='nadzis'?'<span class="cnt">6</span>':''}</button>`).join('')}
+function setNav(k){$('#nav').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.nav===k))}
+
+/* ---------- toast ---------- */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---------- role ---------- */
+function setRole(r){S.role=r;S.me={op:'KS',mgr:'MS',bs:'BS'}[r];
+ $('#meBadge').textContent=S.me==='BS'?'SH':S.me;$('#meBadge').style.background=`var(--u-${S.me})`;
+ $('#meName').textContent={op:'KS · Opiekun',mgr:'Marcin S. · Zarząd',bs:'Biuro Szanghaj'}[r];
+ $('#meRole').textContent='Podgląd jako: '+{op:'Opiekun',mgr:'Zarząd / kierownik',bs:'Biuro Szanghaj'}[r];
+ $('#rolebar').hidden=r!=='bs';$('#today').hidden=r==='bs'?true:$('#today').hidden;
+ if(r==='bs'){S.tab='all-open'}
+ closeDrawerSilent();rerender();toast('Podgląd jako: '+{op:'Opiekun',mgr:'Zarząd / kierownik',bs:'Biuro Szanghaj'}[r]);
+}
+function closeDrawerSilent(){$('#drawer').hidden=true;S.sel=null}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+ const t=e.target;const c=s=>t.closest(s);
+ if(!c('#pop')&&!c('[data-colf]')&&!c('#bLegend')&&!c('#bCols')&&!c('#me')&&!c('#bell'))hidePop();
+ let el;
+ if(el=c('[data-nav]')){const k=el.dataset.nav;if(k==='zlecenia')go('lista');else if(k==='nadzis'){go('lista');$('#today').hidden=false}else toast(`„${el.title}” – ekran poza zakresem tej makiety (5.1 i 5.2)`);return}
+ if(el=c('[data-tab]')){if(el.dataset.tab==='save'){toast('Zapisano widok „Mój widok 1” (filtry, kolumny, sortowanie)');return}S.tab=el.dataset.tab;closeDrawerSilent();renderList();return}
+ if(el=c('[data-op]')){const u=el.dataset.op;S.ops.has(u)?S.ops.delete(u):S.ops.add(u);renderOpSel();renderGrid();return}
+ if(el=c('[data-chipx]')){const k=el.dataset.chipx;if(k==='all'){window._chipX.forEach(f=>f());S.vchips=[]}else window._chipX[+k]();renderOpSel();renderGrid();return}
+ if(el=c('[data-sort]')){const k=el.dataset.sort;S.sort=S.sort?.k===k?(S.sort.d>0?{k,d:-1}:null):{k,d:1};renderGrid();return}
+ if(el=c('[data-colf]')){e.stopPropagation();const col=COLS.find(x=>x.k===el.dataset.colf);const vals=[...new Set(rows().map(o=>valText(o,col)))].sort();const r=el.getBoundingClientRect();
+   showPop(`<div class="mh">${esc(col.l)} · pokaż tylko</div>`+vals.slice(0,14).map(v=>`<button class="mi" data-vfilter="${esc(col.k)}" data-v="${esc(v)}"><span class="val">${esc(v)}</span></button>`).join('')+(S.sort?.k===col.k?'':`<div class="mh">Sortowanie</div><button class="mi" data-sortset="${col.k}:1">Sortuj rosnąco</button><button class="mi" data-sortset="${col.k}:-1">Sortuj malejąco</button>`),r.left,r.bottom+4);return}
+ if(el=c('[data-vfilter]')){S.vchips.push({k:el.dataset.vfilter,v:el.dataset.v});hidePop();renderGrid();return}
+ if(el=c('[data-sortset]')){const [k,d]=el.dataset.sortset.split(':');S.sort={k,d:+d};hidePop();renderGrid();return}
+ if(el=c('[data-ctxopen]')){hidePop();go('zlecenie-'+el.dataset.ctxopen);return}
+ if(el=c('[data-go]')){hidePop();closeDrawerSilent();go('zlecenie-'+el.dataset.go);return}
+ if(el=c('[data-open]')){closeDrawerSilent();go('zlecenie-'+el.dataset.open);return}
+ if(el=c('[data-close-drawer]')){closeDrawer();return}
+ if(el=c('[data-go-list]')){go('lista');return}
+ if(el=c('[data-mail]')){openMail(el.dataset.mail,el.dataset.tpl);return}
+ if(el=c('[data-close-modal]')){$('#ovl').hidden=true;M=null;return}
+ if(t.id==='ovl'){$('#ovl').hidden=true;M=null;return}
+ if(el=c('[data-tpl-pick]')){M.tpl=el.dataset.tplPick;renderMail();return}
+ if(t.id==='mSend'){sendMail();return}
+ if(el=c('[data-dtab]')){S.dtab=el.dataset.dtab;renderDetail(S.curDetail);return}
+ if(el=c('[data-advance]')){const o=byId(S.curDetail);if(el.dataset.advance==='acct'){o.k&&Object.values(o.k).forEach(a=>a.s='ksi');ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,'Przekazano koszty do księgowości']);toast(`${o.nr}: przekazano do księgowości`)}else advance(o);renderDetail(o.id);return}
+ if(el=c('[data-dup]')){const o=newOrder(byId(el.dataset.dup));toast(`Utworzono kopię: ${o.nr} (Nowe)`);go('zlecenie-'+o.id);return}
+ if(c('[data-cancel-ask]')){$('#cancelConfirm').hidden=false;return}
+ if(c('[data-cancel-no]')){$('#cancelConfirm').hidden=true;return}
+ if(el=c('[data-cancel-yes]')){const o=byId(el.dataset.cancelYes);const f=o.status;o.status='Anulowane';ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`Status: <del>${f}</del> → Anulowane`]);toast(`${o.nr} anulowane`);renderDetail(o.id);return}
+ if(el=c('[data-dashtg]')){const f=el.closest('.fld');const inp=f.querySelector('input,select');const on=!f.classList.contains('empty');f.classList.toggle('empty',on);if(on){inp.dataset.prev=inp.value;inp.value=''}else if(inp.dataset.prev)inp.value=inp.dataset.prev;return}
+ if(el=c('[data-addrow]')){const tr=document.createElement('tr');const svc=`<select aria-label="Usługa">${Object.values(SVC).map(s=>`<option>${s}</option>`).join('')}</select>`;const cur=`<select aria-label="Waluta"><option>PLN</option><option>USD</option><option>EUR</option></select>`;
+   tr.innerHTML=el.dataset.addrow==='R'?`<td>${svc}</td><td class="num"><input aria-label="Kwota" style="width:90px;text-align:right" placeholder="0,00"></td><td>${cur}</td><td><input aria-label="Uwagi" placeholder="-"></td><td><span class="chip rz-Dozafakturowania">Do zafakturowania</span></td>`:`<td>${svc}</td><td><select aria-label="Dostawca"><option>TL Log Transport</option><option>CelPort Agencja Celna</option><option>Cargo Protect</option><option>Magazyn DTA</option></select></td><td class="num"><input aria-label="Kwota" style="width:90px;text-align:right" placeholder="0,00"></td><td>${cur}</td><td><select aria-label="Status"><option>Rezerwa</option><option>Zarejestrowany</option></select></td><td>-</td><td><input aria-label="Uwagi" placeholder="-"></td>`;
+   el.parentNode.insertBefore(tr,el);tr.querySelector('input').focus();return}
+ if(el=c('[data-rcpx]')){const o=byId(S.curDetail);o.rcp.splice(+el.dataset.rcpx,1);renderDetail(o.id);return}
+ if(t.id==='awGo'){const o=byId(S.curDetail);const s=$('#awTxt').value;
+   const nm=s.match(/kierowca:\s*([A-ZŁŚŻŹĆ][\wąćęłńóśźż]+)\s+([A-ZŁŚŻŹĆ][\wąćęłńóśźż-]+)/);const tel=s.match(/(\+?\d[\d\s]{8,14}\d)/);
+   const ci=s.match(/ciągnik:\s*([A-Z0-9 ]{4,10}?)(?=,|\n|$)/i);const na=s.match(/naczepa:\s*([A-Z0-9 ]{4,10}?)(?=,|\n|$)/i);const dt=s.match(/(\d{4}-\d{2}-\d{2}).*?(\d{1,2}:\d{2})/);const ms=s.match(/miejsce:\s*(.+)/i);
+   o.awiz={imie:nm?.[1]||'',nazw:nm?.[2]||'',tel:tel?.[1]?.trim()||'',ciag:ci?.[1]?.trim()||'',nacz:na?.[1]?.trim()||'',dt:dt?`${dt[1]} ${dt[2]}`:'',msc:ms?.[1]?.trim()||''};
+   renderDetail(o.id);const n=Object.values(o.awiz).filter(Boolean).length;$('#awNote').textContent=`Rozpoznano ${n} z 7 pól – sprawdź i zapisz.`;return}
+ if(el=c('#bLegend')){const r=el.getBoundingClientRect();if(!$('#pop').hidden&&$('#pop').classList.contains('legend')){hidePop();return}showPop(legendHtml(),r.right-560,r.bottom+6,'legend');return}
+ if(el=c('#bCols')){const r=el.getBoundingClientRect();if(!$('#pop').hidden&&$('#pop').classList.contains('colpick')){hidePop();return}showPop(colPickHtml(),r.right-300,r.bottom+6,'colpick');return}
+ if(el=c('[data-mv]')){const [k,d]=el.dataset.mv.split(':').map(Number);const j=k+d;if(COLS[j]&&COLS[j].g===COLS[k].g&&COLS[j].pin===undefined){[COLS[k],COLS[j]]=[COLS[j],COLS[k]];renderGrid();const p=$('#pop');const st=p.scrollTop;p.innerHTML=colPickHtml();p.scrollTop=st}return}
+ if(c('#bExport')){toast('Eksport do Excela: zlecenia_2026-11-05.xlsx (widok i filtry jak na ekranie)');return}
+ if(c('#bToday')){$('#today').hidden=!$('#today').hidden;return}
+ if(c('#todayClose')){$('#today').hidden=true;return}
+ if(el=c('#todaySeg button')){S.todayScope=el.dataset.s;renderToday();return}
+ if(c('#newOrder')){const o=newOrder();toast(`Utworzono ${o.nr} – uzupełnij dane zlecenia`);go('zlecenie-'+o.id);return}
+ if(el=c('#me')){const r=el.getBoundingClientRect();showPop(`<div class="mh">Podgląd jako</div><button class="mi" data-role="op">${opBadge('KS')} Opiekun (KS)</button><button class="mi" data-role="mgr">${opBadge('MS')} Zarząd / kierownik (MS)</button><button class="mi" data-role="bs"><span class="op" style="background:var(--u-BS)">SH</span> Biuro Szanghaj</button><div class="mh">Konto</div><button class="mi">Ustawienia konta</button><button class="mi">Wyloguj</button>`,r.right-240,r.bottom+6);return}
+ if(el=c('[data-role]')){hidePop();setRole(el.dataset.role);return}
+ if(c('#roleBack')){setRole('op');return}
+ if(el=c('#bell')){const r=el.getBoundingClientRect();showPop(`<div class="mh">Powiadomienia</div>`+ALERTS.map(a=>{const o=byId(a.id);return `<button class="mi" data-go="${o.id}"><span class="sev sev-${a.sev}" style="width:8px;height:8px;border-radius:50%;flex:none"></span><span><b class="mono">${esc(o.nr)}</b> · ${esc(a.t)}</span></button>`}).join(''),r.right-360,r.bottom+6);return}
+ if(c('#collapse')){$('#app').classList.toggle('collapsed');return}
+ // row click (delayed so double-click can edit)
+ const td=c('#grid tbody td');
+ if(td&&!td.classList.contains('edit')){const tr=td.parentNode;if(!tr.dataset.id)return;clearTimeout(window._rc);window._rc=setTimeout(()=>openDrawer(tr.dataset.id),td.dataset.edit?230:0)}
+});
+document.addEventListener('dblclick',e=>{
+ const td=e.target.closest('#grid tbody td[data-edit]');if(!td||S.role==='bs')return;clearTimeout(window._rc);
+ const o=byId(td.parentNode.dataset.id);const col=COLS.find(c=>c.k===td.dataset.k);
+ let val;if(col.date)val=o[col.k];else{const a=(col.amt==='r'?o.r:o.k)[col.sk];val=a?String(a.v).replace('.',','):''}
+ td.classList.add('edit');td.innerHTML=`<input type="${col.date?'date':'text'}" value="${esc(val)}" style="text-align:${col.date?'left':'right'}">`;const inp=td.querySelector('input');inp.focus();inp.select?.();
+ const commit=ok=>{if(ok){if(col.date){o[col.k]=inp.value}else{const n=parseFloat(inp.value.replace(/\s/g,'').replace(',','.'));const box=col.amt==='r'?o.r:o.k;
+   if(isNaN(n))delete box[col.sk];else if(box[col.sk])box[col.sk].v=n;else box[col.sk]=A(n,col.sk==='kol'?'USD':'PLN',col.amt==='k'?{s:'rez',d:SUPPLIERS[col.sk]||o.agent}:{});}
+   ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`${col.l}: <del>${val||'-'}</del> → ${inp.value||'-'}`]);toast(`${o.nr}: zapisano ${col.l}`)}
+  renderGrid()};
+ inp.addEventListener('keydown',ev=>{if(ev.key==='Enter')commit(true);if(ev.key==='Escape'){inp.onblur=null;commit(false)}});
+ inp.onblur=()=>commit(true);
+});
+document.addEventListener('contextmenu',e=>{
+ const td=e.target.closest('#grid tbody td');if(!td||!td.parentNode.dataset.id)return;e.preventDefault();
+ const o=byId(td.parentNode.dataset.id);const col=COLS.find(c=>c.k===td.dataset.k);const v=valText(o,col);
+ showPop(`<div class="mh">${esc(col.l)}</div><button class="mi" data-vfilter="${col.k}" data-v="${esc(v)}">Pokaż tylko wiersze z tą wartością: <span class="val">${esc(v)}</span></button><button class="mi" data-ctxopen="${o.id}">Otwórz zlecenie ${esc(o.nr)}</button>${td.dataset.edit?`<button class="mi" onclick="hidePop();this.closest('body').querySelector('#grid tbody tr[data-id=&quot;${o.id}&quot;] td[data-k=&quot;${col.k}&quot;]').dispatchEvent(new MouseEvent('dblclick',{bubbles:true}))">Edytuj komórkę</button>`:''}`,e.clientX,e.clientY);
+});
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.id==='fKlient'){S.klient=t.value;renderGrid()} else if(t.id==='fTyp1'){S.t1=t.value;renderGrid()} else if(t.id==='fStatus'){S.status=t.value;renderGrid()} else if(t.id==='fRozl'){S.rozl=t.value;renderGrid()}
+ else if(t.id==='fEtdFrom'){S.etdFrom=t.value;renderGrid()} else if(t.id==='fEtdTo'){S.etdTo=t.value;renderGrid()}
+ else if(t.dataset.colon!==undefined){COLS[+t.dataset.colon].on=t.checked;renderGrid()}
+ else if(t.dataset.att!==undefined){t.checked?M.att.add(+t.dataset.att):M.att.delete(+t.dataset.att);renderMail()}
+ else if(t.dataset.cst){const o=byId(S.curDetail);const a=o.k[t.dataset.cst];a.s=t.value;if(t.value!=='rez'&&!a.inv)a.inv='FK/'+Math.floor(1000+Math.random()*8999);updRozl(o);ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`Koszt ${SVC[t.dataset.cst]}: status → ${t.selectedOptions[0].text}`]);renderDetail(o.id)}
+ else if(t.dataset.flag){const o=byId(S.curDetail);o[t.dataset.flag]=t.checked;renderDetail(o.id)}
+ else if(t.id==='c-ver'){const o=byId(S.curDetail);o.verified=t.checked}
+ else if(t.dataset.k&&S.curDetail){const o=byId(S.curDetail);const k=t.dataset.k;if(['kont_nr','ctn','kg','cbm'].includes(k))return;const from=o[k];o[k]=t.value;
+   if(k==='got'||k==='etd'){if(o.status==='Nowe'&&o.got&&o.etd)o.missing=[]}
+   ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.me,`${t.closest('.fld').querySelector('label').textContent}: <del>${from||'-'}</del> → ${t.value||'-'}`]);renderDetail(o.id)}
+});
+document.addEventListener('input',e=>{if(e.target.id==='fText'){S.text=e.target.value;renderGrid()}});
+document.addEventListener('keydown',e=>{
+ if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){e.preventDefault();$('#gsearch').focus()}
+ if(e.key==='Escape'){hidePop();if(!$('#ovl').hidden){$('#ovl').hidden=true;M=null}else if(!$('#drawer').hidden)closeDrawer()}
+ if(e.target.id==='gsearch'&&e.key==='Enter'){const q=e.target.value.trim().toLowerCase();const hit=ORDERS.find(o=>[o.nr,o.kont,o.ref].some(v=>v&&v.toLowerCase()===q));
+   if(hit){go('zlecenie-'+hit.id)}else{S.text=e.target.value;$('#fText').value=S.text;S.tab=TABS.some(t=>t.id==='all-open')?'all-open':S.tab;go('lista');renderList()}}
+ if(e.target.id==='rcpIn'&&e.key==='Enter'&&e.target.value.trim()){const o=byId(S.curDetail);o.rcp.push({a:e.target.value.trim()});renderDetail(o.id);$('#rcpIn').focus()}
+});
+// drag & drop documents
+document.addEventListener('dragover',e=>{const d=e.target.closest('#drop');if(d){e.preventDefault();d.classList.add('over')}});
+document.addEventListener('dragleave',e=>{const d=e.target.closest('#drop');if(d)d.classList.remove('over')});
+function addFiles(files){const o=byId(S.curDetail);if(!o||!files.length)return;
+ const guess=n=>/\.(jpe?g|png|heic)$/i.test(n)?'Zdjęcia z załadunku':/smgs|hbl/i.test(n)?'SMGS / HBL':/invoice|packing|faktura|ci_/i.test(n)?'Dokumenty handlowe':/tlumacz|transl/i.test(n)?'Tłumaczenie':/\.(eml|msg)$/i.test(n)?'Inne':'Inne';
+ [...files].forEach(f=>o.docs.push({g:guess(f.name),n:f.name,by:S.role==='bs'?'Biuro Szanghaj':S.me,dt:TODAY}));
+ ensureHist(o);o.hist.push([TODAY+' '+nowT(),S.role==='bs'?'BS':S.me,`Dodano ${files.length} plik(i)`]);renderDetail(o.id);toast(`Dodano ${files.length} plik(i) do ${o.nr}`)}
+document.addEventListener('drop',e=>{const d=e.target.closest('#drop');if(d){e.preventDefault();addFiles(e.dataTransfer.files)}});
+document.addEventListener('change',e=>{if(e.target.id==='fileIn')addFiles(e.target.files)});
+
+/* ---------- init ---------- */
+renderNav();fillSelects();renderOpSel();
+addEventListener('hashchange',route);
+route();
+</script>
